@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('name',100);
             $table->string('email',100)->unique();
             $table->string('phone',15);
-            $table->enum('jabatan', ['mustasyar','syuriyah','ross syuriah','katib','awan','tanfidiyah','wakil ketua','sekertaris','bendahara']);
+            $table->enum('jabatan', ['mustasyar','syuriyah','ross syuriah','katib','awan','tanfidiyah','wakil ketua','sekertaris','bendahara','anggota']);
             $table->enum('ranting', ['karang tengah','karang mulya','karang timur','pedurenan','pondok bahar','pondok pucung','parung jaya']);
-            $table->enum('status', ['active','in active'])->default('active');
+            $table->enum('status', ['active','inactive']);
             $table->timestamps();
         });
     }

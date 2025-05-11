@@ -11,7 +11,7 @@
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
+            {{-- <i class="fas fa-laugh-wink"></i> --}}
         </div>
         <div class="sidebar-brand-text mx-3">MWCNU</div>
     </a>
@@ -20,7 +20,7 @@
     <hr class="sidebar-divider my-0">
 
     <!-- Nav Item - Dashboard -->
-    <li class="nav-item active">
+    <li class="nav-item {{request()->is('dashboard') ? 'active' : ''}}">
         <a class="nav-link" href="/dashboard">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item">
+    <li class="nav-item {{request()->is('anggota') ? 'active' : ''}}">
         <a class="nav-link" href="/anggota">
             <i class="fas fa-fw fa-users"></i>
             <span>Anggota</span>
