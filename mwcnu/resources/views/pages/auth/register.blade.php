@@ -8,15 +8,14 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>MWCNU - Login</title>
+    <title>MWCNU - Register</title>
 
-    <!-- Font Awesome -->
+    
     <link href="{{ asset('template/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700" rel="stylesheet">
 
-    <!-- SB Admin 2 CSS -->
+    
     <link href="{{ asset('template/css/sb-admin-2.min.css') }}" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
 
     <style>
@@ -61,7 +60,7 @@
                                     title: 'Berhasil!',
                                     text: @json(session('success')),
                                     didClose: () => {
-                                        window.location.href = "/dashboard";
+                                        window.location.href = "/";
                                     }
                                 });
                             </script>
@@ -85,11 +84,14 @@
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center mb-4">
-                                        <h1 class="h4 text-gray-900">Selamat Datang</h1>
-                                        <p class="text-muted">Silakan login untuk melanjutkan</p>
+                                        <h1 class="h4 text-gray-900">Silahkan isi</h1>
                                     </div>
-                                    <form class="user" action="/login" method="POST">
+                                    <form class="user" action="/register" method="POST">
                                         @csrf
+                                        <div class="form-group">
+                                            <input type="text" class="form-control form-control-user" id="inputname"
+                                                name="name" placeholder="Nama lengkap.." required>
+                                        </div>
                                         <div class="form-group">
                                             <input type="email" class="form-control form-control-user" id="inputEmail"
                                                 name="email" placeholder="Email..." required>
@@ -100,12 +102,12 @@
                                             <span toggle="#inputPassword" class="fas fa-eye password-toggle"></span>
                                         </div>
                                         <button type="submit" class="btn btn-success btn-user btn-block">
-                                            Login
+                                            Buat akun
                                         </button>
                                     </form>
                                     <hr>
                                     <div class="text-center">
-                                        <a class="small text-success" href="/register">Buat Akun Baru</a>
+                                        <a class="small text-success" href="/">Login</a>
                                     </div>
                                 </div>
                             </div>

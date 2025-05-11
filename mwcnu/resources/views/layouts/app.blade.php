@@ -84,7 +84,7 @@
                     <div class="modal-body">Apakah anda yakin untuk keluar ? </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" type="button" data-dismiss="modal">Tidak</button>
-                        <button type="submit" class="btn btn-primary" >Keluar</button>
+                        <button type="submit" class="btn btn-success" >Keluar</button>
                     </div>
                 </div>
             </form>
