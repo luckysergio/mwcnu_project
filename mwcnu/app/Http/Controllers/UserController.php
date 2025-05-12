@@ -19,10 +19,18 @@ class UserController extends Controller
         ]);
     }
 
+    public function countSubmittedUsers()
+    {
+        $count = User::where('status', 'submitted')->count();
+        return response()->json(['count' => $count]);
+    }
+
+
     public function account_approval(Request $request, $userId)
     {
         $request->validate([
-            'anggota_id' => 'nullable', 'exists:anggotas,id'
+            'anggota_id' => 'nullable',
+            'exists:anggotas,id'
         ]);
 
         $for = $request->input('for');
@@ -33,8 +41,7 @@ class UserController extends Controller
 
         $anggotaId = $request->input('anggota_id');
 
-        if($request->has('anggota_id') && isset($anggotaId))
-        {
+        if ($request->has('anggota_id') && isset($anggotaId)) {
             Anggota::where('id', $anggotaId)->update([
                 'user_id' => $user->id,
             ]);

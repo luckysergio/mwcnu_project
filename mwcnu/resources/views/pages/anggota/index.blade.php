@@ -2,12 +2,27 @@
 
 @section('content')
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-gray-800">Data Anggota</h1>
-        <a href="/anggota/create" class="btn btn-success shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Anggota
-        </a>
-    </div>
+    @auth
+        @if (auth()->user()->role_id == 1)
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 text-gray-800">Data Anggota</h1>
+                <a href="/anggota/create" class="btn btn-success shadow-sm">
+                    <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Anggota
+                </a>
+            </div>
+        @endif
+    @endauth
+
+    <form method="GET" class="d-flex justify-content-center mb-4">
+        <select name="ranting" id="rantingSelect" class="custom-dropdown" onchange="this.form.submit()">
+            <option value="">-- Semua Ranting --</option>
+            @foreach (['karang tengah', 'karang mulya', 'karang timur', 'pedurenan', 'pondok bahar', 'pondok pucung', 'parung jaya'] as $r)
+                <option value="{{ $r }}" {{ request('ranting') == $r ? 'selected' : '' }}>
+                    {{ ucfirst($r) }}
+                </option>
+            @endforeach
+        </select>
+    </form>    
 
     <div class="card shadow-sm border-0 mb-4 rounded-4">
         <div class="card-body">
@@ -21,7 +36,11 @@
                             <th>Jabatan</th>
                             <th>Ranting</th>
                             <th>Status</th>
-                            <th>Aksi</th>
+                            @auth
+                                @if (auth()->user()->role_id == 1)
+                                    <th>Aksi</th>
+                                @endif
+                            @endauth
                         </tr>
                     </thead>
                     <tbody>
@@ -33,23 +52,30 @@
                                 <td>{{ $item->jabatan }}</td>
                                 <td>{{ $item->ranting }}</td>
                                 <td>
-                                    <span class="badge text-capitalize px-3 py-2 {{ $item->status == 'active' ? 'bg-success' : 'bg-danger' }} text-white rounded-pill">
+                                    <span
+                                        class="badge px-3 py-2 text-white rounded-pill {{ $item->status == 'active' ? 'bg-success' : 'bg-danger' }}">
                                         {{ $item->status }}
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <a href="/anggota/{{ $item->id }}" class="btn btn-warning btn-sm rounded-pill shadow-sm" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm rounded-pill shadow-sm" title="Hapus"
-                                            data-bs-toggle="modal" data-bs-target="#confirmationDelete-{{ $item->id }}">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                </td>
+                                @auth
+                                    @if (auth()->user()->role_id == 1)
+                                        <td>
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="/anggota/{{ $item->id }}" class="btn btn-warning btn-sm rounded-pill shadow-sm"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-danger btn-sm rounded-pill shadow-sm" title="Hapus"
+                                                    data-bs-toggle="modal" data-bs-target="#confirmationDelete-{{ $item->id }}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    @endif
+                                @endauth
                             </tr>
 
+                            <!-- Modal Konfirmasi -->
                             <div class="modal fade" id="confirmationDelete-{{ $item->id }}" tabindex="-1"
                                 aria-labelledby="deleteLabel{{ $item->id }}" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
@@ -68,7 +94,8 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger">Ya, Hapus</button>
                                             </form>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Batal</button>
                                         </div>
                                     </div>
                                 </div>

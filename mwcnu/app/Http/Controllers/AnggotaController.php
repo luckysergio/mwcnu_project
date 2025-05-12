@@ -11,11 +11,16 @@ class AnggotaController extends Controller
 {
     public function index()
     {
-        $anggotas = Anggota::all();
+        $query = Anggota::query();
 
-        return view('pages.anggota.index', [
-            'anggotas' => $anggotas,
-        ]);
+        if (request('ranting')) {
+            $query->where('ranting', request('ranting'));
+        }
+
+        $anggotas = $query->orderByRaw("FIELD(jabatan, 'mustasyar','syuriyah','ross syuriah','katib','awan','tanfidiyah','wakil ketua','sekertaris','bendahara','anggota')")
+            ->get();
+
+        return view('pages.anggota.index', compact('anggotas'));
     }
 
     public function create()

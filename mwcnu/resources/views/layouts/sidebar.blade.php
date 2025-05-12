@@ -1,21 +1,33 @@
 <style>
     .bg-custom-green {
-      background-color: #1cc88a;
-      background-image: linear-gradient(180deg, #1cc88a 10%, #17a673 100%);
-      background-size: cover;
+        background-color: #1cc88a;
+        background-image: linear-gradient(180deg, #1cc88a 10%, #17a673 100%);
+        background-size: cover;
     }
-  </style>  
+
+    .nav-link .badge-counter {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 10px;
+        right: 5px;
+    }
+
+    .nav-link {
+        position: relative;
+    }
+</style>
 
 <ul class="navbar-nav bg-custom-green sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
     <div class="sidebar-brand d-flex align-items-center justify-content-center flex-column text-center">
-        <div class="sidebar-brand-icon">
-            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo MWCNU" class="img-fluid" style="max-height: 80px; object-fit: contain;">
-        </div>
-        {{-- <div class="sidebar-brand-text mt-2" style="font-size: 14px; font-weight: bold;">KARANG TENGAH</div> --}}
+        {{-- <div class="sidebar-brand-icon">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo MWCNU" class="img-fluid"
+                style="max-height: 80px; object-fit: contain;">
+        </div> --}}
+        <div class="sidebar-brand-text mt-2" style="font-size: 14px; font-weight: bold;">MWCNU KARANG TENGAH</div>
     </div>
-     
+
 
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
@@ -30,11 +42,6 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
-    {{-- <!-- Heading -->
-    <div class="sidebar-heading">
-        Manajemen data
-    </div> --}}
-
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item {{request()->is('anggota') ? 'active' : ''}}">
         <a class="nav-link" href="/anggota">
@@ -43,20 +50,60 @@
         </a>
     </li>
 
-    <li class="nav-item {{request()->is('persetujuan-user') ? 'active' : ''}}">
-        <a class="nav-link" href="/account-request">
-            <i class="fas fa-fw fa-user"></i>
-            <span>Pengajuan Akun</span>
-        </a>
-    </li>
+    @auth
+        @if (auth()->user()->role_id == 1)
+            <li class="nav-item {{ request()->is('account-request') ? 'active' : '' }}">
+                <a class="nav-link" href="/account-request">
+                    <i class="fas fa-fw fa-user"></i>
+                    <span>Pengajuan Akun</span>
+                    <!-- Badge Notification -->
+                    <span id="accountRequestBadge" class="badge badge-danger badge-counter" style="display: none;"></span>
+                </a>
+            </li>
+        @endif
+    @endauth
 
-    <!-- Nav Item - Utilities Collapse Menu -->
-    <li class="nav-item">
+    <script>
+        // Fungsi untuk mengambil jumlah pengajuan
+        function fetchAccountRequests() {
+            fetch('/count-submitted-users')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('accountRequestBadge');
+                    if (data.count > 0) {
+                        badge.style.display = 'inline-block';
+                        badge.textContent = data.count;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Jalankan pertama kali
+        document.addEventListener('DOMContentLoaded', fetchAccountRequests);
+
+        // Optional: Auto-refresh setiap 1 menit (60000 ms)
+        setInterval(fetchAccountRequests, 600000);
+    </script>
+
+    <li class="nav-item {{ request()->is('proker') ? 'active' : '' }}">
         <a class="nav-link" href="/proker">
-            <i class="fas fa-fw fa-tasks"></i>
+            <i class="fas fa-fw fa-list"></i>
             <span>Program kerja</span>
         </a>
     </li>
+
+    @auth
+        @if (auth()->user()->role_id == 1)
+            <li class="nav-item {{ request()->is('proker-request') ? 'active' : '' }}">
+                <a class="nav-link" href="/proker-request">
+                    <i class="fas fa-fw fa-paper-plane"></i>
+                    <span>Pengajuan program kerja</span>
+                </a>
+            </li>
+        @endif
+    @endauth
 
     <!-- Divider -->
     <hr class="sidebar-divider">

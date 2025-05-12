@@ -1,0 +1,143 @@
+/* === Container dan Layout === */
+.card-custom {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+}
+
+/* === Filter Section === */
+.filter-container {
+    max-width: 500px;
+    margin: auto;
+    padding: 1.5rem 2rem;
+}
+
+.filter-title {
+    font-weight: 600;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.filter-title i {
+    margin-right: 0.5rem;
+    color: #198754;
+}
+
+#rantingSelect {
+    border-radius: 2rem;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+#rantingSelect:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+/* === Tabel Anggota === */
+.table-custom th,
+.table-custom td {
+    vertical-align: middle;
+    text-align: center;
+    font-size: 14px;
+    padding: 0.75rem;
+}
+
+.table-custom thead {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* === Badge Status === */
+.badge-status {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.badge-status.active {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-status.inactive {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* === Tombol Aksi === */
+.btn-action {
+    border-radius: 2rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.btn-warning {
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #d39e00;
+}
+
+.btn-danger:hover {
+    background-color: #bd2130;
+}
+
+/* === Modal === */
+.modal-content {
+    border-radius: 1rem;
+}
+.modal-header.bg-danger {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.filter-container select {
+    border-radius: 2rem;
+    padding: 0.5rem 1.5rem;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    width: auto;
+    text-align: center;
+    font-weight: 500;
+}
+
+.custom-dropdown {
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 2px solid #28a745;
+    background-color: white;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    appearance: none; /* remove default arrow in some browsers */
+    text-align: center;
+    outline: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.custom-dropdown:hover {
+    border-color: #1e7e34;
+}
