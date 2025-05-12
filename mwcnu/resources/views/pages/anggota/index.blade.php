@@ -28,7 +28,7 @@
                         @forelse ($anggotas as $item)
                             <tr>
                                 <td>{{ $item->name }}</td>
-                                <td>{{ $item->email }}</td>
+                                <td>{{ $item->user?->email ?? 'akun belum tertaut' }}</td>
                                 <td>{{ $item->phone }}</td>
                                 <td>{{ $item->jabatan }}</td>
                                 <td>{{ $item->ranting }}</td>

@@ -9,4 +9,9 @@ class Anggota extends Model
     protected $table = "anggotas";
 
     protected $guarded = [];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

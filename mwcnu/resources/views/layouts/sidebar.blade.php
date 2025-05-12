@@ -9,12 +9,13 @@
 <ul class="navbar-nav bg-custom-green sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-        <div class="sidebar-brand-icon rotate-n-15">
-            {{-- <i class="fas fa-laugh-wink"></i> --}}
+    <div class="sidebar-brand d-flex align-items-center justify-content-center flex-column text-center">
+        <div class="sidebar-brand-icon">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo MWCNU" class="img-fluid" style="max-height: 80px; object-fit: contain;">
         </div>
-        <div class="sidebar-brand-text mx-3">MWCNU</div>
-    </a>
+        {{-- <div class="sidebar-brand-text mt-2" style="font-size: 14px; font-weight: bold;">KARANG TENGAH</div> --}}
+    </div>
+     
 
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
@@ -29,16 +30,23 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
-    <!-- Heading -->
+    {{-- <!-- Heading -->
     <div class="sidebar-heading">
         Manajemen data
-    </div>
+    </div> --}}
 
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item {{request()->is('anggota') ? 'active' : ''}}">
         <a class="nav-link" href="/anggota">
             <i class="fas fa-fw fa-users"></i>
             <span>Anggota</span>
+        </a>
+    </li>
+
+    <li class="nav-item {{request()->is('persetujuan-user') ? 'active' : ''}}">
+        <a class="nav-link" href="/account-request">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Pengajuan Akun</span>
         </a>
     </li>
 

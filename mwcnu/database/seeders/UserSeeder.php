@@ -14,9 +14,9 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'AdminMWNCU',
-            'email' => 'admin@mwncu.co.id',
-            'password' => 'password',
+            'name' => 'AdminMWCNU',
+            'email' => 'admin@mwncu.com',
+            'password' => '12341234',
             'status' => 'approved',
             'role_id' => '1',
         ]);

@@ -29,7 +29,7 @@ class AnggotaController extends Controller
             $request->validate(
                 [
                     'name' => 'required|string|max:100',
-                    'email' => 'required|string|email|max:100|unique:anggotas',
+                    // 'email' => 'required|string|email|max:100|unique:anggotas',
                     'phone' => 'required|string|min:10|max:15',
                     'jabatan' => 'required|in:mustasyar,syuriyah,ross syuriah,katib,awan,tanfidiyah,wakil ketua,sekertaris,bendahara,anggota',
                     'ranting' => 'required|in:karang tengah,karang mulya,karang timur,pedurenan,pondok bahar,pondok pucung,parung jaya',
@@ -37,8 +37,8 @@ class AnggotaController extends Controller
                 ],
                 [
                     'name.required' => 'Nama harus diisi',
-                    'email.required' => 'Email harus diisi',
-                    'email.unique' => 'Email sudah terdaftar',
+                    // 'email.required' => 'Email harus diisi',
+                    // 'email.unique' => 'Email sudah terdaftar',
                     'phone.required' => 'Nomor Handphone harus diisi',
                     'jabatan.required' => 'Jabatan harus dipilih',
                     'ranting.required' => 'ranting harus dipilih',
@@ -48,7 +48,7 @@ class AnggotaController extends Controller
 
             $anggota = Anggota::create([
                 'name' => $request->name,
-                'email' => $request->email,
+                // 'email' => $request->email,
                 'phone' => $request->phone,
                 'jabatan' => $request->jabatan,
                 'ranting' => $request->ranting,
@@ -76,7 +76,7 @@ class AnggotaController extends Controller
 
             $validatedData = $request->validate([
                 'name' => 'required|string|max:100',
-                'email' => 'required|string|email|max:100|unique:anggotas,email,' . $id,
+                // 'email' => 'required|string|email|max:100|unique:anggotas,email,' . $id,
                 'phone' => 'required|string|min:10|max:15',
                 'jabatan' => 'required|in:mustasyar,syuriah,ross syuriah,katib,awan,tanfidiyah,wakil ketua,sekertaris,bendahara,anggota',
                 'ranting' => 'required|in:karang tengah,karang mulya,karang timur,pedurenan,pondok bahar,pondok pucung,parung jaya',

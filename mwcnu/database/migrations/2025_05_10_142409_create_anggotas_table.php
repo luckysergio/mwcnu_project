@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('anggotas', function (Blueprint $table) {
             $table->id();
             $table->string('name',100);
-            $table->string('email',100)->unique();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('phone',15);
             $table->enum('jabatan', ['mustasyar','syuriyah','ross syuriah','katib','awan','tanfidiyah','wakil ketua','sekertaris','bendahara','anggota']);
             $table->enum('ranting', ['karang tengah','karang mulya','karang timur','pedurenan','pondok bahar','pondok pucung','parung jaya']);
             $table->enum('status', ['active','inactive']);
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
     
