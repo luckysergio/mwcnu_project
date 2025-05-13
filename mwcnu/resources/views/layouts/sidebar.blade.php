@@ -130,6 +130,13 @@
         setInterval(fetchProkerRequests, 600000);
     </script>
 
+    <li class="nav-item {{ request()->is('jadwal') ? 'active' : '' }}">
+        <a class="nav-link" href="/jadwal">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Jadwal program kerja</span>
+        </a>
+    </li>
+
     <!-- Divider -->
     <hr class="sidebar-divider">
 
