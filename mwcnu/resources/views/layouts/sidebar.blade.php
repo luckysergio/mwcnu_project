@@ -100,10 +100,35 @@
                 <a class="nav-link" href="/proker-request">
                     <i class="fas fa-fw fa-paper-plane"></i>
                     <span>Pengajuan program kerja</span>
+                    <span id="prokerRequestBadge" class="badge badge-danger badge-counter" style="display: none;"></span>
                 </a>
             </li>
         @endif
     @endauth
+
+    <script>
+        // Fungsi untuk mengambil jumlah pengajuan
+        function fetchProkerRequests() {
+            fetch('/count-submitted-proker')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('prokerRequestBadge');
+                    if (data.count > 0) {
+                        badge.style.display = 'inline-block';
+                        badge.textContent = data.count;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Jalankan pertama kali
+        document.addEventListener('DOMContentLoaded', fetchProkerRequests);
+
+        // Optional: Auto-refresh setiap 1 menit (60000 ms)
+        setInterval(fetchProkerRequests, 600000);
+    </script>
 
     <!-- Divider -->
     <hr class="sidebar-divider">

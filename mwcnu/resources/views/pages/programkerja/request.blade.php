@@ -16,9 +16,8 @@
                 <table class="table table-hover align-middle text-center">
                     <thead class="table-light">
                         <tr>
-                            <th>Nama</th>
+                            <th>Mengajukan</th>
                             <th>Program kerja</th>
-                            <th>Tanggal pengajuan</th>
                             <th>Catatan</th>
                             @auth
                                 @if (auth()->user()->role_id == 1)
@@ -32,7 +31,6 @@
                             <tr>
                                 <td>{{ $item->user->name }}</td>
                                 <td>{{ $item->program}}</td>
-                                <td>{{ $item->created_at }}</td>
                                 <td>{{ $item->catatan }}</td>
                                 <td>
                                     <div class="d-flex justify-content-center" style="gap: 10px;">
@@ -55,25 +53,22 @@
                                     <div class="modal-content border-0 rounded-3">
                                         <div class="modal-header bg-danger text-white">
                                             <h5 class="modal-title" id="deleteLabel{{ $item->id }}">Konfirmasi Tolak</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="modal-body text-center">
-                                            <input type="hidden" name="for" value="reject">
-                                            <p class="mb-0">Yakin ingin menolak <strong>{{ $item->name }}</strong>?</p>
-                                        </div>
-                                        <div class="modal-footer justify-content-center">
-                                            <form action="/account-request/approval/{{ $item->id }}" method="POST">
-                                                @csrf
-                                                @method('POST')
+                                        <form action="{{ url('/proker-request/approval/' . $item->id) }}" method="POST">
+                                            @csrf
+                                            <div class="modal-body text-center">
+                                                <input type="hidden" name="for" value="reject">
+                                                <p class="mb-0">Yakin ingin menolak <strong>{{ $item->program }}</strong>?</p>
+                                            </div>
+                                            <div class="modal-footer justify-content-center">
                                                 <button type="submit" class="btn btn-danger">Ya, tolak</button>
-                                            </form>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Batal</button>
-                                        </div>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
-                            </div>
+                            </div>                            
 
                             <div class="modal fade" id="confirmationApprove-{{ $item->id }}" tabindex="-1"
                                 aria-labelledby="approveLabel{{ $item->id }}" aria-hidden="true">
@@ -84,23 +79,12 @@
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                         </div>
-
-                                        <form action="/account-request/approval/{{ $item->id }}" method="POST">
+                                        <form action="/proker-request/approval/{{ $item->id }}" method="POST">
                                             @csrf
                                             @method('POST')
                                             <div class="modal-body text-center">
                                                 <input type="hidden" name="for" value="approve">
-                                                <p class="mb-0">Yakin ingin menyetujui <strong>{{ $item->name }}</strong>?</p>
-                                                <div class="form-group mt-3">
-                                                    <label for="anggota_id_{{ $item->id }}">Pilih data anggota</label>
-                                                    <select name="anggota_id" id="anggota_id_{{ $item->id }}"
-                                                        class="form-control">
-                                                        <option value="">Tidak ada</option>
-                                                        @foreach ($anggotas as $anggota)
-                                                            <option value="{{ $anggota->id }}">{{ $anggota->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                                <p class="mb-0">Yakin ingin menyetujui <strong>{{ $item->program }}</strong>?</p>
                                             </div>
                                             <div class="modal-footer justify-content-center">
                                                 <button type="submit" class="btn btn-success">Ya, Setuju</button>
@@ -108,7 +92,6 @@
                                                     data-bs-dismiss="modal">Batal</button>
                                             </div>
                                         </form>
-
                                     </div>
                                 </div>
                             </div>

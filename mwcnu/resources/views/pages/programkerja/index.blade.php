@@ -4,7 +4,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 text-gray-800">Data Program kerja</h1>
-        <a href="/anggota/create" class="btn btn-success shadow-sm">
+        <a href="/proker/create" class="btn btn-success shadow-sm">
             <i class="fas fa-plus fa-sm text-white-50"></i> Ajukan program kerja
         </a>
     </div>
@@ -28,8 +28,7 @@
                         <tr>
                             <th>Mengajukan</th>
                             <th>Program kerja</th>
-                            <th>Tanggal pengajuan</th>
-                            <th>Proses pengajuan</th>
+                            <th>Status</th>
                             <th>Catatan</th>
                     </thead>
                     <tbody>
@@ -37,8 +36,7 @@
                             <tr>
                                 <td>{{ $item->user->name }}</td>
                                 <td>{{ $item->program}}</td>
-                                <td>{{ $item->created_at }}</td>
-                                <td>{{ $item->updated_at }}</td>
+                                <td>{{ $item->status }}</td>
                                 <td>{{ $item->catatan }}</td>
                             </tr>
                         @empty
