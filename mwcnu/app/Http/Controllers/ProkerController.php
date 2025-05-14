@@ -91,6 +91,29 @@ class ProkerController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $proker = Proker::findOrFail($id);
+        return view('pages.programkerja.edit', compact('proker'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $proker = Proker::findOrFail($id);
+
+        $validated = $request->validate([
+            'program' => 'required|string|max:100',
+            'catatan' => 'required|string|max:100',
+        ]);
+
+        $proker->update([
+            'program' => $validated['program'],
+            'catatan' => $validated['catatan'],
+        ]);
+
+        return redirect("/proker/{$id}")->with('success', 'Program kerja berhasil diperbarui.');
+    }
+
     public function destroy($id)
     {
         $prokers = Proker::findOrFail($id);

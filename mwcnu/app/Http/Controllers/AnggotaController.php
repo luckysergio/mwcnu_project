@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Anggota;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class AnggotaController extends Controller
@@ -68,7 +69,8 @@ class AnggotaController extends Controller
 
     public function edit($id)
     {
-        $anggota = Anggota::findOrFail($id);
+        $anggota = Anggota::with('user')->findOrFail($id);
+
         return view('pages.anggota.edit', [
             'anggota' => $anggota,
         ]);
@@ -77,20 +79,39 @@ class AnggotaController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $anggota = Anggota::findOrFail($id);
+            $anggota = Anggota::with('user')->findOrFail($id);
 
             $validatedData = $request->validate([
                 'name' => 'required|string|max:100',
-                // 'email' => 'required|string|email|max:100|unique:anggotas,email,' . $id,
                 'phone' => 'required|string|min:10|max:15',
                 'jabatan' => 'required|in:mustasyar,syuriah,ross syuriah,katib,awan,tanfidiyah,wakil ketua,sekertaris,bendahara,anggota',
                 'ranting' => 'required|in:karang tengah,karang mulya,karang timur,pedurenan,pondok bahar,pondok pucung,parung jaya',
                 'status' => 'required|in:active,inactive',
+                'user_name' => 'required|string|max:100',
+                'user_email' => 'required|email|unique:users,email,' . $anggota->user->id,
+                'user_password' => 'nullable|string|min:6',
             ]);
 
-            $anggota->update($validatedData);
+            $anggota->update([
+                'name' => $validatedData['name'],
+                'phone' => $validatedData['phone'],
+                'jabatan' => $validatedData['jabatan'],
+                'ranting' => $validatedData['ranting'],
+                'status' => $validatedData['status'],
+            ]);
 
-            return redirect("/anggota/{$id}")->with('success', 'Berhasil mengubah data');
+            // Update user
+            $userUpdate = [
+                'name' => $validatedData['user_name'],
+                'email' => $validatedData['user_email'],
+            ];
+            if (!empty($validatedData['user_password'])) {
+                $userUpdate['password'] = Hash::make($validatedData['user_password']);
+            }
+
+            $anggota->user->update($userUpdate);
+
+            return redirect("/anggota/{$id}")->with('success', 'Berhasil mengubah data anggota dan user.');
         } catch (Exception $e) {
             return redirect("/anggota/{$id}")->withErrors(['error' => $e->getMessage()]);
         }
