@@ -93,7 +93,6 @@
                                 @endauth
                             </tr>
 
-                            <!-- Modal Konfirmasi -->
                             <div class="modal fade" id="confirmationDelete-{{ $item->id }}" tabindex="-1"
                                 aria-labelledby="deleteLabel{{ $item->id }}" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">

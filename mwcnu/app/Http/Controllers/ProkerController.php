@@ -90,4 +90,12 @@ class ProkerController extends Controller
             return redirect('proker/create')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function destroy($id)
+    {
+        $prokers = Proker::findOrFail($id);
+        $prokers->delete();
+
+        return redirect('/proker')->with('success', 'Data program kerja berhasil dihapus');
+    }
 }

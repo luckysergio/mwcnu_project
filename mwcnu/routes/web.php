@@ -26,15 +26,16 @@ Route::post('/anggota', [AnggotaController::class, 'store'])->middleware('role:A
 Route::put('/anggota/{id}', [AnggotaController::class, 'update'])->middleware('role:Admin');
 Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy'])->middleware('role:Admin');
 
-Route::get('/account-request', [UserController::class, 'account_request']);
-Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval']);
+Route::get('/account-request', [UserController::class, 'account_request'])->middleware('role:Admin');
+Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval'])->middleware('role:Admin');
 Route::get('/count-submitted-users', [UserController::class, 'countSubmittedUsers'])->middleware('role:Admin');
 
-Route::get('/proker-request', [ProkerController::class, 'proker_request']);
-Route::get('/proker', [ProkerController::class, 'index']);
+Route::get('/proker-request', [ProkerController::class, 'proker_request'])->middleware('role:Admin');;
+Route::get('/proker', [ProkerController::class, 'index'])->middleware('role:Admin');;
 Route::post('/proker-request/approval/{id}', [ProkerController::class, 'proker_approval']);
 Route::get('/proker/create', [ProkerController::class, 'create'])->middleware('role:Admin,User');
 Route::post('/proker', [ProkerController::class, 'store'])->middleware('role:Admin,User');
+Route::delete('/proker/{id}', [ProkerController::class, 'destroy'])->middleware('role:Admin');
 Route::get('/count-submitted-proker', [ProkerController::class, 'countSubmittedProker'])->middleware('role:Admin');
 
 Route::get('/jadwal', [JadwalProkerController::class, 'index'])->middleware('role:Admin,User');
@@ -43,4 +44,4 @@ Route::get('/jadwal/{id}', [JadwalProkerController::class, 'edit'])->middleware(
 Route::post('/jadwal', [JadwalProkerController::class, 'store'])->middleware('role:Admin');
 Route::put('/jadwal/{id}', [JadwalProkerController::class, 'update'])->middleware('role:Admin');
 Route::delete('/jadwal/{id}', [JadwalProkerController::class, 'destroy'])->middleware('role:Admin');
-Route::get('/count-proker-belum-jadwal', [ProkerController::class, 'countBelumJadwal']);
+Route::get('/count-proker-belum-jadwal', [ProkerController::class, 'countBelumJadwal'])->middleware('role:Admin');

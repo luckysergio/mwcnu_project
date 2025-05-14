@@ -39,6 +39,17 @@
     pointer-events: none;
     box-shadow: none;
     }
+
+    .dashboard-card {
+    background-color: #fff;
+    border-radius: 16px;
+    transition: all 0.2s ease-in-out;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
 </style>
 
 <div class="container">
@@ -52,18 +63,31 @@
     <div class="row">
         @forelse ($penjadwalan as $item)
             <div class="col-md-4 mb-4">
-                <div class="card dashboard-card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">{{ $item->proker->program ?? '-' }}</h6>
-                            <span class="badge badge-status badge-penjadwalan">Penjadwalan</span>
+                <div class="card dashboard-card border-0 shadow-sm p-3 rounded-4">
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="mb-0 fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
+                            <span class="badge rounded-pill text-white px-3 py-1" style="background-color: #f0ad4e;">
+                                {{ ucfirst($item->status) }}
+                            </span>
                         </div>
-                        <p class="mb-1"><i class="fas fa-calendar-alt me-1"></i><strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</p>
-                        <p class="mb-1"><i class="fas fa-calendar-check me-1"></i><strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</p>
-                        <p class="mb-0"><i class="fas fa-sticky-note me-1"></i><strong>Catatan:</strong> {{ $item->catatan ?? '-' }}</p>
+                        <ul class="list-unstyled small text-secondary mb-0">
+                            <li class="mb-1">
+                                <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                <strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
+                            </li>
+                            <li class="mb-1">
+                                <i class="fas fa-calendar-check me-2 text-success"></i>
+                                <strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
+                            </li>
+                            <li>
+                                <i class="fas fa-sticky-note me-2 text-muted"></i>
+                                <strong>Catatan:</strong> {{ $item->catatan ?? '-' }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
+            </div>        
         @empty
             <p class="text-muted text-center w-100">Tidak ada Program kerja</p> 
         @endforelse
@@ -75,18 +99,31 @@
     <div class="row">
         @forelse ($berjalan as $item)
             <div class="col-md-4 mb-4">
-                <div class="card dashboard-card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">{{ $item->proker->program ?? '-' }}</h6>
-                            <span class="badge badge-status badge-berjalan">Berjalan</span>
+                <div class="card dashboard-card border-0 shadow-sm p-3 rounded-4">
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="mb-0 fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
+                            <span class="badge rounded-pill text-white px-3 py-1" style="background-color: #5cb85c;">
+                                {{ ucfirst($item->status) }}
+                            </span>
                         </div>
-                        <p class="mb-1"><i class="fas fa-calendar-alt me-1"></i><strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</p>
-                        <p class="mb-1"><i class="fas fa-calendar-check me-1"></i><strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</p>
-                        <p class="mb-0"><i class="fas fa-sticky-note me-1"></i><strong>Catatan:</strong> {{ $item->catatan ?? '-' }}</p>
+                        <ul class="list-unstyled small text-secondary mb-0">
+                            <li class="mb-1">
+                                <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                <strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
+                            </li>
+                            <li class="mb-1">
+                                <i class="fas fa-calendar-check me-2 text-success"></i>
+                                <strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
+                            </li>
+                            <li>
+                                <i class="fas fa-sticky-note me-2 text-muted"></i>
+                                <strong>Catatan:</strong> {{ $item->catatan ?? '-' }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
+            </div>        
         @empty
             <p class="text-muted text-center w-100">Tidak ada Program kerja</p> 
         @endforelse
@@ -98,18 +135,31 @@
     <div class="row">
         @forelse ($selesai as $item)
             <div class="col-md-4 mb-4">
-                <div class="card dashboard-card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">{{ $item->proker->program ?? '-' }}</h6>
-                            <span class="badge badge-status badge-selesai">Selesai</span>
+                <div class="card dashboard-card border-0 shadow-sm p-3 rounded-4">
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="mb-0 fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
+                            <span class="badge rounded-pill text-white px-3 py-1" style="background-color: #6c757d;">
+                                {{ ucfirst($item->status) }}
+                            </span>
                         </div>
-                        <p class="mb-1"><i class="fas fa-calendar-alt me-1"></i><strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</p>
-                        <p class="mb-1"><i class="fas fa-calendar-check me-1"></i><strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</p>
-                        <p class="mb-0"><i class="fas fa-sticky-note me-1"></i><strong>Catatan:</strong> {{ $item->catatan ?? '-' }}</p>
+                        <ul class="list-unstyled small text-secondary mb-0">
+                            <li class="mb-1">
+                                <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                <strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
+                            </li>
+                            <li class="mb-1">
+                                <i class="fas fa-calendar-check me-2 text-success"></i>
+                                <strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
+                            </li>
+                            <li>
+                                <i class="fas fa-sticky-note me-2 text-muted"></i>
+                                <strong>Catatan:</strong> {{ $item->catatan ?? '-' }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
+            </div>        
         @empty
             <p class="text-muted text-center w-100">Tidak ada Program kerja</p>        
         @endforelse

@@ -44,13 +44,6 @@
                             value="{{ old('name', $anggota->name) }}">
                     </div>
 
-                    {{-- Email
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="text" name="email" id="email" class="form-control"
-                            value="{{ old('email', $anggota->email) }}">
-                    </div> --}}
-
                     {{-- Phone --}}
                     <div class="mb-3">
                         <label for="phone" class="form-label">Nomor Handphone</label>
@@ -58,7 +51,6 @@
                             value="{{ old('phone', $anggota->phone) }}">
                     </div>
 
-                    {{-- Jabatan --}}
                     <div class="mb-3">
                         <label for="jabatan" class="form-label">Jabatan</label>
                         <select name="jabatan" id="jabatan" class="form-control @error('jabatan') is-invalid @enderror">
@@ -77,7 +69,6 @@
                         @enderror
                     </div>
 
-                    {{-- Ranting --}}
                     <div class="mb-3">
                         <label for="ranting" class="form-label">Ranting</label>
                         <select name="ranting" id="ranting" class="form-control @error('ranting') is-invalid @enderror">
@@ -96,7 +87,6 @@
                         @enderror
                     </div>
 
-                    {{-- Status --}}
                     <div class="mb-3">
                         <label for="status" class="form-label">Status</label>
                         <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
