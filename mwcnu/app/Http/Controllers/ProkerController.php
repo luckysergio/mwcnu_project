@@ -38,7 +38,16 @@ class ProkerController extends Controller
     public function countSubmittedProker()
     {
         $count = Proker::where('status', 'pengajuan')->count();
-        return response()->json(['count'=>$count]);
+        return response()->json(['count' => $count]);
+    }
+
+    public function countBelumJadwal()
+    {
+        $count = Proker::where('status', 'di setujui')
+            ->doesntHave('jadwal')
+            ->count();
+
+        return response()->json(['count' => $count]);
     }
 
     public function index()

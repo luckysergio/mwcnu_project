@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\JadwalProkerController;
 use App\Http\Controllers\ProkerController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/dashboard', function () {
     return view('pages.dashboard');
 })->middleware('role:Admin,User');
+Route::get('/dashboard', [JadwalProkerController::class, 'show'])->name('dashboard');
 
 Route::get('/anggota', [AnggotaController::class, 'index'])->middleware('role:Admin,User');
 Route::get('/anggota/create', [AnggotaController::class, 'create'])->middleware('role:Admin');
@@ -34,3 +36,11 @@ Route::post('/proker-request/approval/{id}', [ProkerController::class, 'proker_a
 Route::get('/proker/create', [ProkerController::class, 'create'])->middleware('role:Admin,User');
 Route::post('/proker', [ProkerController::class, 'store'])->middleware('role:Admin,User');
 Route::get('/count-submitted-proker', [ProkerController::class, 'countSubmittedProker'])->middleware('role:Admin');
+
+Route::get('/jadwal', [JadwalProkerController::class, 'index'])->middleware('role:Admin,User');
+Route::get('/jadwal/create', [JadwalProkerController::class, 'create'])->middleware('role:Admin');
+Route::get('/jadwal/{id}', [JadwalProkerController::class, 'edit'])->middleware('role:Admin');
+Route::post('/jadwal', [JadwalProkerController::class, 'store'])->middleware('role:Admin');
+Route::put('/jadwal/{id}', [JadwalProkerController::class, 'update'])->middleware('role:Admin');
+Route::delete('/jadwal/{id}', [JadwalProkerController::class, 'destroy'])->middleware('role:Admin');
+Route::get('/count-proker-belum-jadwal', [ProkerController::class, 'countBelumJadwal']);

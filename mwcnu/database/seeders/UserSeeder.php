@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     {
         User::create([
             'name' => 'AdminMWCNU',
-            'email' => 'admin@mwncu.com',
+            'email' => 'admin@mwcnu.com',
             'password' => '12341234',
             'status' => 'approved',
             'role_id' => '1',

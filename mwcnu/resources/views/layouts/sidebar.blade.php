@@ -130,12 +130,40 @@
         setInterval(fetchProkerRequests, 600000);
     </script>
 
-    <li class="nav-item {{ request()->is('jadwal') ? 'active' : '' }}">
-        <a class="nav-link" href="/jadwal">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Jadwal program kerja</span>
-        </a>
-    </li>
+    @auth
+        @if (auth()->user()->role_id == 1)
+        <li class="nav-item {{ request()->is('jadwal') ? 'active' : '' }}">
+            <a class="nav-link d-flex justify-content-between align-items-center" href="/jadwal">
+                <div>
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Jadwal Program Kerja</span>
+                </div>
+                <span id="belumJadwalBadge" class="badge badge-danger badge-counter" style="display: none;"></span>
+            </a>
+        </li>        
+        @endif
+    @endauth
+
+    <script>
+        function fetchBelumJadwalProker() {
+            fetch('/count-proker-belum-jadwal')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('belumJadwalBadge');
+                    if (data.count > 0) {
+                        badge.style.display = 'inline-block';
+                        badge.textContent = data.count;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    
+        document.addEventListener('DOMContentLoaded', fetchBelumJadwalProker);
+        setInterval(fetchBelumJadwalProker, 600000);
+    </script>
+    
 
     <!-- Divider -->
     <hr class="sidebar-divider">

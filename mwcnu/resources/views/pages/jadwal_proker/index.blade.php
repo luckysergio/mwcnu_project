@@ -4,14 +4,18 @@
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
 
-
     @auth
         @if (auth()->user()->role_id == 1)
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 text-gray-800">Data Anggota</h1>
-                <a href="/anggota/create" class="btn btn-success shadow-sm">
-                    <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Anggota
-                </a>
+                <h1 class="h3 text-gray-800">Jadwal program kerja</h1>
+                <a href="/jadwal/create" class="btn btn-success shadow-sm position-relative">
+                    <i class="fas fa-plus fa-sm text-white-50"></i> Buat jadwal program kerja
+                    @if($belumDijadwalCount > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                            {{ $belumDijadwalCount }}
+                        </span>
+                    @endif
+                </a>                
             </div>
         @endif
     @endauth
@@ -25,17 +29,17 @@
                 title: 'Berhasil!',
                 text: @json(session('success')),
                 didClose: () => {
-                    window.location.href = "/anggota";
+                    window.location.href = "/jadwal";
                 }
             });
         </script>
     @endif
 
     <form method="GET" class="d-flex justify-content-center mb-4">
-        <select name="ranting" id="rantingSelect" class="custom-dropdown" onchange="this.form.submit()">
-            <option value="">-- Semua Ranting --</option>
-            @foreach (['karang tengah', 'karang mulya', 'karang timur', 'pedurenan', 'pondok bahar', 'pondok pucung', 'parung jaya'] as $r)
-                <option value="{{ $r }}" {{ request('ranting') == $r ? 'selected' : '' }}>
+        <select name="status" id="statusSelect" class="custom-dropdown" onchange="this.form.submit()">
+            <option value="">-- Semua Status --</option>
+            @foreach (['penjadwalan', 'berjalan', 'selesai'] as $r)
+                <option value="{{ $r }}" {{ request('status') == $r ? 'selected' : '' }}>
                     {{ ucfirst($r) }}
                 </option>
             @endforeach
@@ -48,12 +52,12 @@
                 <table class="table table-hover align-middle text-center">
                     <thead class="table-light">
                         <tr>
-                            <th>Nama</th>
-                            <th>Email</th>
-                            <th>HP</th>
-                            <th>Jabatan</th>
-                            <th>Ranting</th>
+                            <th>Penanggung jawab</th>
+                            <th>Program Kerja</th>
+                            <th>Mulai</th>
+                            <th>Selesai</th>
                             <th>Status</th>
+                            <th>Catatan</th>
                             @auth
                                 @if (auth()->user()->role_id == 1)
                                     <th>Aksi</th>
@@ -62,24 +66,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($anggotas as $item)
+                        @forelse ($jadwals as $item)
                             <tr>
-                                <td>{{ $item->name }}</td>
-                                <td>{{ $item->user?->email ?? 'akun belum tertaut' }}</td>
-                                <td>{{ $item->phone }}</td>
-                                <td>{{ $item->jabatan }}</td>
-                                <td>{{ $item->ranting }}</td>
-                                <td>
-                                    <span
-                                        class="badge px-3 py-2 text-white rounded-pill {{ $item->status == 'active' ? 'bg-success' : 'bg-danger' }}">
-                                        {{ $item->status }}
-                                    </span>
-                                </td>
+                                <td>{{ $item->penanggungJawab->name }}</td>
+                                <td>{{ $item->proker->program }}</td>
+                                <td>{{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</td>
+                                <td>{{ $item->status }}</td>
+                                <td>{{ $item->catatan }}</td>
                                 @auth
                                     @if (auth()->user()->role_id == 1)
                                         <td>
                                             <div class="d-flex justify-content-center gap-2">
-                                                <a href="/anggota/{{ $item->id }}" class="btn btn-warning btn-sm rounded-pill shadow-sm"
+                                                <a href="/jadwal/{{ $item->id }}" class="btn btn-warning btn-sm rounded-pill shadow-sm"
                                                     title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -104,10 +103,11 @@
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body text-center">
-                                            <p class="mb-0">Yakin ingin menghapus data <strong>{{ $item->name }}</strong>?</p>
+                                            <p class="mb-0">Yakin ingin menghapus data <strong>{{ $item->program }}</strong>?
+                                            </p>
                                         </div>
                                         <div class="modal-footer justify-content-center">
-                                            <form action="/anggota/{{ $item->id }}" method="POST">
+                                            <form action="/jadwal/{{ $item->id }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger">Ya, Hapus</button>
@@ -120,7 +120,7 @@
                             </div>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-3 text-muted">Tidak ada data anggota.</td>
+                                <td colspan="7" class="text-center py-3 text-muted">Tidak ada jadwal program kerja</td>
                             </tr>
                         @endforelse
                     </tbody>

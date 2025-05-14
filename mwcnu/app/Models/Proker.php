@@ -14,4 +14,9 @@ class Proker extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function jadwal()
+    {
+        return $this->hasOne(Jadwal_proker::class);
+    }
 }
