@@ -71,6 +71,10 @@ class AnggotaController extends Controller
     {
         $anggota = Anggota::with('user')->findOrFail($id);
 
+        if (!$anggota->user) {
+            return redirect('/anggota')->with('error', 'Silakan tautkan akun terlebih dahulu.');
+        }
+
         return view('pages.anggota.edit', [
             'anggota' => $anggota,
         ]);

@@ -31,6 +31,16 @@
         </script>
     @endif
 
+    @if(session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: @json(session('error'))
+            });
+        </script>
+    @endif
+
     <form method="GET" class="d-flex justify-content-center mb-4">
         <select name="ranting" id="rantingSelect" class="custom-dropdown" onchange="this.form.submit()">
             <option value="">-- Semua Ranting --</option>

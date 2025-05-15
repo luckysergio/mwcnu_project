@@ -27,6 +27,7 @@ class JadwalProkerController extends Controller
             $query->where('status', request('status'));
         }
 
+        $query->orderBy('tanggal_mulai');
         $jadwals = $query->get();
 
         $belumDijadwalCount = Proker::where('status', 'di setujui')
