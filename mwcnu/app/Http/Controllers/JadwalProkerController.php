@@ -78,7 +78,7 @@ class JadwalProkerController extends Controller
             ]);
             return redirect('jadwal/create')->with('success', 'Jadwal program kerja berhasil dibuat');
         } catch (Exception $e) {
-            return redirect('jadwal/create')->with('error', $e->getMessage());
+            return redirect('jadwal/create')->withErrors(['error' => $e->getMessage()]);
         }
     }
 

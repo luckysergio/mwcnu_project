@@ -87,7 +87,7 @@ class ProkerController extends Controller
 
             return redirect('proker/create')->with('success', 'Program kerja berhasil diajukan');
         } catch (\Exception $e) {
-            return redirect('proker/create')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect('proker/create')->withErrors(['error'=> 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 

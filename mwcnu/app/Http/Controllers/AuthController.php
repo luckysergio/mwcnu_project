@@ -16,8 +16,6 @@ class AuthController extends Controller
         //     return back();
         // }
 
-        
-
         return view('pages.auth.login');
     }
 
@@ -55,7 +53,8 @@ class AuthController extends Controller
     }
 
 
-    public function _logout(Request $request){
+    public function _logout(Request $request)
+    {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -84,15 +83,16 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-
-        // if (Auth::check()) {
-        //     return back();
-        // }
-
         $validated = $request->validate([
             'name' => ['required'],
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required'],
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar, silakan gunakan email lain.',
+            'password.required' => 'Password wajib diisi.',
         ]);
 
         $user = new User();
@@ -104,5 +104,4 @@ class AuthController extends Controller
 
         return redirect('/register')->with('success', 'Berhasil mendaftar akun, menunggu persetujuan admin');
     }
-
 }

@@ -75,7 +75,7 @@
                             <select name="jabatan" id="jabatan" class="form-control @error('jabatan') is-invalid @enderror">
                                 <option disabled selected>Pilih Jabatan</option>
                                 <option value="mustasyar">Mustasyar</option>
-                                <option value="syuriah">Syuriah</option>
+                                <option value="syuriyah">Syuriah</option>
                                 <option value="ross syuriah">Ross Syuriah</option>
                                 <option value="katib">Katib</option>
                                 <option value="awan">A'wan</option>

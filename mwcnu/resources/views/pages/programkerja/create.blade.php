@@ -53,12 +53,13 @@
 
                         <div class="mb-3">
                             <label for="catatan" class="form-label">Catatan</label>
-                            <input type="text" name="catatan" id="catatan"
-                                class="form-control @error('catatan') is-invalid @enderror">
+                            <textarea name="catatan" id="catatan" rows="4"
+                                class="form-control @error('catatan') is-invalid @enderror"
+                                style="resize: vertical;">{{ old('catatan') }}</textarea>
                             @error('catatan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div>                        
                     </div>
 
                     <div class="card-footer bg-white d-flex justify-content-end">

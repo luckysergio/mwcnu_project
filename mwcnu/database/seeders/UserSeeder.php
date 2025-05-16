@@ -20,5 +20,12 @@ class UserSeeder extends Seeder
             'status' => 'approved',
             'role_id' => '1',
         ]);
+        User::create([
+            'name' => 'ketuaMWCNU',
+            'email' => 'ketua@mwcnu.com',
+            'password' => '12341234',
+            'status' => 'approved',
+            'role_id' => '1',
+        ]);
     }
 }

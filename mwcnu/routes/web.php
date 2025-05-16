@@ -17,7 +17,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/dashboard', function () {
     return view('pages.dashboard');
 })->middleware('role:Admin,User');
-Route::get('/dashboard', [JadwalProkerController::class, 'show'])->name('dashboard');
+Route::get('/dashboard', [JadwalProkerController::class, 'show'])->middleware('role:Admin,User');
 
 Route::get('/anggota', [AnggotaController::class, 'index'])->middleware('role:Admin,User');
 Route::get('/anggota/create', [AnggotaController::class, 'create'])->middleware('role:Admin');
