@@ -15,11 +15,14 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
         }
 
-        .badge-status {
+        /* .badge-status {
+            display: inline-block;
             font-size: 0.75rem;
             padding: 0.4em 0.8em;
             border-radius: 30px;
             font-weight: 500;
+            min-width: 100px;
+            text-align: center;
         }
 
         .badge-penjadwalan {
@@ -32,7 +35,7 @@
 
         .badge-selesai {
             background-color: #9e9e9e;
-        }
+        } */
 
         input.form-control[readonly] {
             pointer-events: none;
@@ -72,11 +75,8 @@
                 <div class="col-md-4 mb-4">
                     <div class="card dashboard-card border-0 shadow-sm p-3 rounded-4">
                         <div class="card-body p-0">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h6 class="mb-0 fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
-                                <span class="badge badge-status badge-penjadwalan">
-                                    {{ ucfirst($item->status) }}
-                                </span>
+                            <div class="text-center mb-3">
+                                <h6 class="fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
                             </div>
                             <ul class="list-unstyled small text-secondary mb-0">
                                 <li class="mb-1">
@@ -107,14 +107,11 @@
         </div>
         <div class="row">
             @forelse ($berjalan as $item)
-                <div class="col-md-4 mb-4">
+                <div class="col-12 col-md-4 mb-4">
                     <div class="card dashboard-card border-0 shadow-sm p-3 rounded-4">
                         <div class="card-body p-0">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h6 class="mb-0 fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
-                                <span class="badge badge-status badge-penjadwalan">
-                                    {{ ucfirst($item->status) }}
-                                </span>
+                            <div class="text-center mb-3">
+                                <h6 class="fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
                             </div>
                             <ul class="list-unstyled small text-secondary mb-0">
                                 <li class="mb-1">
@@ -148,11 +145,8 @@
                 <div class="col-md-4 mb-4">
                     <div class="card dashboard-card border-0 shadow-sm p-3 rounded-4">
                         <div class="card-body p-0">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h6 class="mb-0 fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
-                                <span class="badge badge-status badge-penjadwalan">
-                                    {{ ucfirst($item->status) }}
-                                </span>
+                            <div class="text-center mb-3">
+                                <h6 class="fw-semibold text-dark">{{ $item->proker->program ?? '-' }}</h6>
                             </div>
                             <ul class="list-unstyled small text-secondary mb-0">
                                 <li class="mb-1">

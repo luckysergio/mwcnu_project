@@ -30,15 +30,15 @@ Route::get('/account-request', [UserController::class, 'account_request'])->midd
 Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval'])->middleware('role:Admin');
 Route::get('/count-submitted-users', [UserController::class, 'countSubmittedUsers'])->middleware('role:Admin');
 
-Route::get('/proker-request', [ProkerController::class, 'proker_request'])->middleware('role:Admin');;
-Route::get('/proker', [ProkerController::class, 'index'])->middleware('role:Admin,User');;
-Route::post('/proker-request/approval/{id}', [ProkerController::class, 'proker_approval']);
+Route::get('/proker-request', [ProkerController::class, 'proker_request'])->middleware('role:Admin,User');
+Route::get('/proker', [ProkerController::class, 'index'])->middleware('role:Admin,User');
+Route::post('/proker-request/approval/{id}', [ProkerController::class, 'proker_approval'])->middleware('role:Admin,User');
 Route::get('/proker/create', [ProkerController::class, 'create'])->middleware('role:Admin,User');
 Route::post('/proker', [ProkerController::class, 'store'])->middleware('role:Admin,User');
 Route::get('/proker/{id}', [ProkerController::class, 'edit'])->middleware('role:Admin');
 Route::put('/proker/{id}', [ProkerController::class, 'update'])->middleware('role:Admin');
 Route::delete('/proker/{id}', [ProkerController::class, 'destroy'])->middleware('role:Admin');
-Route::get('/count-submitted-proker', [ProkerController::class, 'countSubmittedProker'])->middleware('role:Admin');
+Route::get('/count-submitted-proker', [ProkerController::class, 'countSubmittedProker'])->middleware('role:Admin,User');
 
 Route::get('/jadwal', [JadwalProkerController::class, 'index'])->middleware('role:Admin,User');
 Route::get('/jadwal/create', [JadwalProkerController::class, 'create'])->middleware('role:Admin');
