@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anggota;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -71,12 +72,11 @@ class AnggotaController extends Controller
     {
         $anggota = Anggota::with('user')->findOrFail($id);
 
-        if (!$anggota->user) {
-            return redirect('/anggota')->with('error', 'Silakan tautkan akun terlebih dahulu.');
-        }
+        $users = $anggota->user ? collect() : User::whereDoesntHave('anggota')->get();
 
         return view('pages.anggota.edit', [
             'anggota' => $anggota,
+            'users' => $users,
         ]);
     }
 
@@ -85,16 +85,25 @@ class AnggotaController extends Controller
         try {
             $anggota = Anggota::with('user')->findOrFail($id);
 
-            $validatedData = $request->validate([
+            $rules = [
                 'name' => 'required|string|max:100',
                 'phone' => 'required|string|min:10|max:15',
                 'jabatan' => 'required|in:mustasyar,syuriah,ross syuriah,katib,awan,tanfidiyah,wakil ketua,sekertaris,bendahara,anggota',
                 'ranting' => 'required|in:karang tengah,karang mulya,karang timur,pedurenan,pondok bahar,pondok pucung,parung jaya',
                 'status' => 'required|in:active,inactive',
-                'user_name' => 'required|string|max:100',
-                'user_email' => 'required|email|unique:users,email,' . $anggota->user->id,
-                'user_password' => 'nullable|string|min:6',
-            ]);
+            ];
+
+            if ($anggota->user) {
+                $rules += [
+                    'user_name' => 'required|string|max:100',
+                    'user_email' => 'required|email|unique:users,email,' . $anggota->user->id,
+                    'user_password' => 'nullable|string|min:6',
+                ];
+            } else {
+                $rules['user_id'] = 'required|exists:users,id';
+            }
+
+            $validatedData = $request->validate($rules);
 
             $anggota->update([
                 'name' => $validatedData['name'],
@@ -104,21 +113,65 @@ class AnggotaController extends Controller
                 'status' => $validatedData['status'],
             ]);
 
-            // Update user
-            $userUpdate = [
-                'name' => $validatedData['user_name'],
-                'email' => $validatedData['user_email'],
-            ];
-            if (!empty($validatedData['user_password'])) {
-                $userUpdate['password'] = Hash::make($validatedData['user_password']);
+            if ($anggota->user) {
+                $userUpdate = [
+                    'name' => $validatedData['user_name'],
+                    'email' => $validatedData['user_email'],
+                ];
+
+                if (!empty($validatedData['user_password'])) {
+                    $userUpdate['password'] = Hash::make($validatedData['user_password']);
+                }
+
+                $anggota->user->update($userUpdate);
+            } else {
+                $user = User::findOrFail($validatedData['user_id']);
+
+                if ($user->anggota) {
+                    return redirect("/anggota/{$id}")->withErrors(['user_id' => 'User sudah tertaut ke anggota lain.']);
+                }
+
+                $anggota->user_id = $user->id;
+                $anggota->save();
+
+                $user->status = 'approved';
+                $user->save();
             }
 
-            $anggota->user->update($userUpdate);
-
-            return redirect("/anggota/{$id}")->with('success', 'Berhasil mengubah data anggota dan user.');
+            return redirect("/anggota/{$id}")->with('success', 'Berhasil mengubah data anggota.');
         } catch (Exception $e) {
             return redirect("/anggota/{$id}")->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    public function linkUserForm($anggotaId)
+    {
+        $anggota = Anggota::findOrFail($anggotaId);
+
+        $availableUsers = User::whereDoesntHave('anggota')->get();
+
+        return view('pages.anggota.link-user', [
+            'anggota' => $anggota,
+            'users' => $availableUsers,
+        ]);
+    }
+
+    public function linkUser(Request $request, $anggotaId)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $anggota = Anggota::findOrFail($anggotaId);
+
+        $user = User::findOrFail($request->user_id);
+        if ($user->anggota) {
+            return redirect()->back()->withErrors(['user_id' => 'User ini sudah tertaut dengan anggota lain.']);
+        }
+
+        $anggota->update(['user_id' => $user->id]);
+
+        return redirect("/anggota/{$anggotaId}")->with('success', 'Berhasil menautkan akun ke anggota.');
     }
 
     public function destroy($id)

@@ -26,6 +26,9 @@ Route::post('/anggota', [AnggotaController::class, 'store'])->middleware('role:A
 Route::put('/anggota/{id}', [AnggotaController::class, 'update'])->middleware('role:Admin');
 Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy'])->middleware('role:Admin');
 
+Route::get('/anggota/{id}/link-user', [AnggotaController::class, 'linkUserForm'])->name('anggota.link-user.form');
+Route::post('/anggota/{id}/link-user', [AnggotaController::class, 'linkUser'])->name('anggota.link-user');
+
 Route::get('/account-request', [UserController::class, 'account_request'])->middleware('role:Admin');
 Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval'])->middleware('role:Admin');
 Route::get('/count-submitted-users', [UserController::class, 'countSubmittedUsers'])->middleware('role:Admin');

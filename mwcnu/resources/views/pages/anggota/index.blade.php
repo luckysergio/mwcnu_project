@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
 
 
@@ -18,7 +17,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
 
-    @if(session('success'))
+    @if (session('success'))
         <script>
             Swal.fire({
                 icon: 'success',
@@ -31,7 +30,7 @@
         </script>
     @endif
 
-    @if(session('error'))
+    @if (session('error'))
         <script>
             Swal.fire({
                 icon: 'error',
@@ -89,12 +88,13 @@
                                     @if (auth()->user()->role_id == 1)
                                         <td>
                                             <div class="d-flex justify-content-center gap-2">
-                                                <a href="/anggota/{{ $item->id }}" class="btn btn-warning btn-sm rounded-pill shadow-sm"
-                                                    title="Edit">
+                                                <a href="/anggota/{{ $item->id }}"
+                                                    class="btn btn-warning btn-sm rounded-pill shadow-sm" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-sm rounded-pill shadow-sm" title="Hapus"
-                                                    data-bs-toggle="modal" data-bs-target="#confirmationDelete-{{ $item->id }}">
+                                                <button type="button" class="btn btn-danger btn-sm rounded-pill shadow-sm"
+                                                    title="Hapus" data-bs-toggle="modal"
+                                                    data-bs-target="#confirmationDelete-{{ $item->id }}">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </div>
@@ -102,18 +102,19 @@
                                     @endif
                                 @endauth
                             </tr>
-
                             <div class="modal fade" id="confirmationDelete-{{ $item->id }}" tabindex="-1"
                                 aria-labelledby="deleteLabel{{ $item->id }}" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content border-0 rounded-3">
                                         <div class="modal-header bg-danger text-white">
-                                            <h5 class="modal-title" id="deleteLabel{{ $item->id }}">Konfirmasi Hapus</h5>
+                                            <h5 class="modal-title" id="deleteLabel{{ $item->id }}">Konfirmasi Hapus
+                                            </h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body text-center">
-                                            <p class="mb-0">Yakin ingin menghapus data <strong>{{ $item->name }}</strong>?</p>
+                                            <p class="mb-0">Yakin ingin menghapus data
+                                                <strong>{{ $item->name }}</strong>?</p>
                                         </div>
                                         <div class="modal-footer justify-content-center">
                                             <form action="/anggota/{{ $item->id }}" method="POST">
@@ -139,5 +140,4 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 @endsection
