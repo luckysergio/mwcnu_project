@@ -26,3 +26,12 @@ Sistem Informasi Organisasi (SIO) ini dikembangkan khusus untuk mendukung kegiat
 - MySQL – Sistem manajemen basis data relasional
 - Blade Templating – Untuk pembuatan tampilan yang dinamis
 
+<<<<<<< HEAD
+=======
+## 🚀 Instalasi dan Konfigurasi
+
+1. **Clone proyek ini**
+   ```bash
+   git clone https://github.com/username/mwcnu-sio.git
+   cd mwcnu-sio
+>>>>>>> ab8c795bd6f56fd37350e88e835c627f63a4c8f2
