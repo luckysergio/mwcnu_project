@@ -6,8 +6,10 @@
     {{-- Header dan tombol tambah --}}
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h1 class="text-3xl font-bold text-gray-900">Data Program Kerja</h1>
-        <a href="/proker/create" class="btn btn-success">
-            <i class="fas fa-plus mr-2"></i> Ajukan program kerja
+        <a href="/proker/create"
+            class="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 active:from-green-700 active:to-green-800 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out border border-green-400 hover:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-200">
+            <i class="fas fa-plus text-sm"></i>
+            <span>Ajukan Program Kerja</span>
         </a>
     </div>
 

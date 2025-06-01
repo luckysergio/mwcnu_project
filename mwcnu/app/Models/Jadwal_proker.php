@@ -19,4 +19,9 @@ class Jadwal_proker extends Model
     {
         return $this->belongsTo(User::class, 'penanggung_jawab_id');
     }
+
+    public function anggarans()
+    {
+        return $this->hasMany(Anggaran::class);
+    }
 }

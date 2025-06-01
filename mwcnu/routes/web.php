@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnggaranController;
 use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\JadwalProkerController;
@@ -53,3 +54,13 @@ Route::get('/count-proker-belum-jadwal', [ProkerController::class, 'countBelumJa
 
 Route::get('/profile', [UserController::class, 'profile_view'])->middleware('role:Admin,User');
 Route::put('/profile/{id}', [UserController::class, 'profile_update'])->middleware('role:Admin,User');
+
+Route::get('/anggaran', [AnggaranController::class, 'index'])->name('anggaran.index');
+Route::get('/anggaran/create', [AnggaranController::class, 'create'])->name('anggaran.create');
+Route::post('/anggaran', [AnggaranController::class, 'store'])->name('anggaran.store');
+Route::get('/anggaran/{id}/edit', [AnggaranController::class, 'edit'])->name('anggaran.edit');
+Route::put('/anggaran/{id}', [AnggaranController::class, 'update'])->name('anggaran.update');
+Route::delete('/anggaran/{id}', [AnggaranController::class, 'destroy'])->name('anggaran.destroy');
+Route::get('/anggaran/show-jadwal', [AnggaranController::class, 'show'])->name('anggaran.showJadwal');
+Route::get('/anggaran/download-pdf', [AnggaranController::class, 'downloadPdf'])->name('anggaran.downloadPdf');
+

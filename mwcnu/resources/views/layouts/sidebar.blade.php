@@ -163,8 +163,14 @@
         document.addEventListener('DOMContentLoaded', fetchBelumJadwalProker);
         setInterval(fetchBelumJadwalProker, 600000);
     </script>
-    
 
+    <li class="nav-item {{ request()->is('anggaran') ? 'active' : '' }}">
+        <a class="nav-link" href="/anggaran">
+            <i class="fas fa-fw fa-file-invoice-dollar"></i>
+            <span>Laporan anggaran</span>
+        </a>
+    </li>
+    
     <!-- Divider -->
     <hr class="sidebar-divider">
 

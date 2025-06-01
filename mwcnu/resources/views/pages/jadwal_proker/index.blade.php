@@ -10,13 +10,13 @@
                 <h1 class="text-3xl font-bold text-gray-900">Jadwal Program Kerja</h1>
                 <div class="relative">
                     <a href="/jadwal/create"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-lg shadow-md transition">
-                        <i class="fas fa-plus"></i>
-                        Buat Jadwal
+                        class="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 active:from-green-700 active:to-green-800 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out border border-green-400 hover:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-200">
+                        <i class="fas fa-plus text-sm"></i>
+                        <span>Buat Jadwal</span>
                     </a>
                     @if ($belumDijadwalCount > 0)
                         <span
-                            class="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold px-2 py-0.5 rounded-full shadow ring-1 ring-white">
+                            class="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold min-w-[24px] h-6 flex items-center justify-center rounded-full shadow-lg ring-2 ring-white animate-pulse">
                             {{ $belumDijadwalCount }}
                         </span>
                     @endif
@@ -25,7 +25,6 @@
         @endif
     @endauth
 
-    {{-- Flash message --}}
     @if (session('success'))
         <script>
             Swal.fire({
@@ -39,7 +38,6 @@
         </script>
     @endif
 
-    {{-- Filter --}}
     <form method="GET" class="flex justify-center mb-8">
         <div class="relative w-full max-w-xs">
             <select name="status" id="statusSelect" onchange="this.form.submit()"
@@ -59,7 +57,6 @@
         </div>
     </form>
 
-    {{-- Tabel --}}
     <div class="bg-white shadow-md rounded-xl overflow-hidden mb-10">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
@@ -69,8 +66,6 @@
                         <th class="px-4 py-3 text-center">Program Kerja</th>
                         <th class="px-4 py-3 text-center">Mulai</th>
                         <th class="px-4 py-3 text-center">Selesai</th>
-                        <th class="px-4 py-3 text-center">Status</th>
-                        <th class="px-4 py-3 text-center">Catatan</th>
                         @auth
                             @if (auth()->user()->role_id == 1)
                                 <th class="px-4 py-3 text-center">Aksi</th>
@@ -87,15 +82,6 @@
                                 {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</td>
                             <td class="px-4 py-3 text-center">
                                 {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</td>
-                            <td class="px-4 py-3 text-center capitalize">
-                                <span
-                                    class="inline-block px-3 py-1 rounded-full text-xs font-semibold text-white
-                                {{ $item->status === 'selesai' ? 'bg-green-600' : ($item->status === 'berjalan' ? 'bg-yellow-500 text-black' : 'bg-blue-500') }}">
-                                    {{ ucfirst($item->status) }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-center whitespace-normal break-words max-w-xs">
-                                {{ $item->catatan ?? '-' }}</td>
                             @auth
                                 @if (auth()->user()->role_id == 1)
                                     <td class="px-4 py-3 text-center">
@@ -131,7 +117,6 @@
         </div>
     </div>
 
-    {{-- Delete Confirmation --}}
     <script>
         function confirmDelete(id, program) {
             Swal.fire({
