@@ -32,8 +32,7 @@
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
 
-    <!-- Nav Item - Dashboard -->
-    <li class="nav-item {{request()->is('dashboard') ? 'active' : ''}}">
+    <li class="nav-item {{ request()->is('dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="/dashboard">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
@@ -42,8 +41,7 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
-    <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item {{request()->is('anggota') ? 'active' : ''}}">
+    <li class="nav-item {{ request()->is('anggota') ? 'active' : '' }}">
         <a class="nav-link" href="/anggota">
             <i class="fas fa-fw fa-users"></i>
             <span>Anggota</span>
@@ -51,12 +49,15 @@
     </li>
 
     @auth
-        @if (auth()->user()->role_id == 1)
+        @php
+            $user = auth()->user();
+            $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+        @endphp
+        @if ($user->role_id == 1 || $isSekretaris)
             <li class="nav-item {{ request()->is('account-request') ? 'active' : '' }}">
                 <a class="nav-link" href="/account-request">
                     <i class="fas fa-fw fa-user"></i>
                     <span>Pengajuan Akun</span>
-                    <!-- Badge Notification -->
                     <span id="accountRequestBadge" class="badge badge-danger badge-counter" style="display: none;"></span>
                 </a>
             </li>
@@ -64,7 +65,6 @@
     @endauth
 
     <script>
-        // Fungsi untuk mengambil jumlah pengajuan
         function fetchAccountRequests() {
             fetch('/count-submitted-users')
                 .then(response => response.json())
@@ -80,10 +80,8 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        // Jalankan pertama kali
         document.addEventListener('DOMContentLoaded', fetchAccountRequests);
 
-        // Optional: Auto-refresh setiap 1 menit (60000 ms)
         setInterval(fetchAccountRequests, 600000);
     </script>
 
@@ -123,24 +121,22 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        // Jalankan pertama kali
         document.addEventListener('DOMContentLoaded', fetchProkerRequests);
 
-        // Optional: Auto-refresh setiap 1 menit (60000 ms)
         setInterval(fetchProkerRequests, 600000);
     </script>
 
     @auth
         @if (auth()->user()->role_id == 1)
-        <li class="nav-item {{ request()->is('jadwal') ? 'active' : '' }}">
-            <a class="nav-link d-flex justify-content-between align-items-center" href="/jadwal">
-                <div>
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Jadwal Program Kerja</span>
-                </div>
-                <span id="belumJadwalBadge" class="badge badge-danger badge-counter" style="display: none;"></span>
-            </a>
-        </li>        
+            <li class="nav-item {{ request()->is('jadwal') ? 'active' : '' }}">
+                <a class="nav-link d-flex justify-content-between align-items-center" href="/jadwal">
+                    <div>
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Jadwal Program Kerja</span>
+                    </div>
+                    <span id="belumJadwalBadge" class="badge badge-danger badge-counter" style="display: none;"></span>
+                </a>
+            </li>
         @endif
     @endauth
 
@@ -159,7 +155,7 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
-    
+
         document.addEventListener('DOMContentLoaded', fetchBelumJadwalProker);
         setInterval(fetchBelumJadwalProker, 600000);
     </script>
@@ -170,7 +166,7 @@
             <span>Laporan anggaran</span>
         </a>
     </li>
-    
+
     <!-- Divider -->
     <hr class="sidebar-divider">
 

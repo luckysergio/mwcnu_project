@@ -4,7 +4,11 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
 
     @auth
-        @if (auth()->user()->role_id == 1)
+        @php
+            $user = auth()->user();
+            $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+        @endphp
+        @if ($user->role_id == 1 || $isSekretaris)
             <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                 <h1 class="text-3xl font-bold text-gray-900">Data Anggota</h1>
                 <a href="/anggota/create"
@@ -65,7 +69,11 @@
                         <th class="px-6 py-4 text-center">Ranting</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         @auth
-                            @if (auth()->user()->role_id == 1)
+                            @php
+                                $user = auth()->user();
+                                $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+                            @endphp
+                            @if ($user->role_id == 1 || $isSekretaris)
                                 <th class="px-6 py-4 text-center">Aksi</th>
                             @endif
                         @endauth
@@ -89,7 +97,11 @@
                                 </span>
                             </td>
                             @auth
-                                @if (auth()->user()->role_id == 1)
+                                @php
+                                    $user = auth()->user();
+                                    $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+                                @endphp
+                                @if ($user->role_id == 1 || $isSekretaris)
                                     <td class="px-6 py-4 text-center whitespace-nowrap">
                                         <div class="flex justify-center gap-2">
                                             <a href="/anggota/{{ $item->id }}"

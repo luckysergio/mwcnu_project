@@ -21,27 +21,27 @@ Route::get('/dashboard', function () {
 Route::get('/dashboard', [JadwalProkerController::class, 'show'])->middleware('role:Admin,User');
 
 Route::get('/anggota', [AnggotaController::class, 'index'])->middleware('role:Admin,User');
-Route::get('/anggota/create', [AnggotaController::class, 'create'])->middleware('role:Admin');
-Route::get('/anggota/{id}', [AnggotaController::class, 'edit'])->middleware('role:Admin');
-Route::post('/anggota', [AnggotaController::class, 'store'])->middleware('role:Admin');
-Route::put('/anggota/{id}', [AnggotaController::class, 'update'])->middleware('role:Admin');
-Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy'])->middleware('role:Admin');
+Route::get('/anggota/create', [AnggotaController::class, 'create'])->middleware('role:Admin,User');
+Route::get('/anggota/{id}', [AnggotaController::class, 'edit'])->middleware('role:Admin,User');
+Route::post('/anggota', [AnggotaController::class, 'store'])->middleware('role:Admin,User');
+Route::put('/anggota/{id}', [AnggotaController::class, 'update'])->middleware('role:Admin,User');
+Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy'])->middleware('role:Admin,User');
 
 Route::get('/anggota/{id}/link-user', [AnggotaController::class, 'linkUserForm'])->name('anggota.link-user.form');
 Route::post('/anggota/{id}/link-user', [AnggotaController::class, 'linkUser'])->name('anggota.link-user');
 
-Route::get('/account-request', [UserController::class, 'account_request'])->middleware('role:Admin');
-Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval'])->middleware('role:Admin');
-Route::get('/count-submitted-users', [UserController::class, 'countSubmittedUsers'])->middleware('role:Admin');
+Route::get('/account-request', [UserController::class, 'account_request'])->middleware('role:Admin,User');
+Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval'])->middleware('role:Admin,User');
+Route::get('/count-submitted-users', [UserController::class, 'countSubmittedUsers'])->middleware('role:Admin,User');
 
 Route::get('/proker-request', [ProkerController::class, 'proker_request'])->middleware('role:Admin,User');
 Route::get('/proker', [ProkerController::class, 'index'])->middleware('role:Admin,User');
 Route::post('/proker-request/approval/{id}', [ProkerController::class, 'proker_approval'])->middleware('role:Admin,User');
 Route::get('/proker/create', [ProkerController::class, 'create'])->middleware('role:Admin,User');
 Route::post('/proker', [ProkerController::class, 'store'])->middleware('role:Admin,User');
-Route::get('/proker/{id}', [ProkerController::class, 'edit'])->middleware('role:Admin');
-Route::put('/proker/{id}', [ProkerController::class, 'update'])->middleware('role:Admin');
-Route::delete('/proker/{id}', [ProkerController::class, 'destroy'])->middleware('role:Admin');
+Route::get('/proker/{id}', [ProkerController::class, 'edit'])->middleware('role:Admin,User');
+Route::put('/proker/{id}', [ProkerController::class, 'update'])->middleware('role:Admin,User');
+Route::delete('/proker/{id}', [ProkerController::class, 'destroy'])->middleware('role:Admin,User');
 Route::get('/count-submitted-proker', [ProkerController::class, 'countSubmittedProker'])->middleware('role:Admin,User');
 
 Route::get('/jadwal', [JadwalProkerController::class, 'index'])->middleware('role:Admin,User');

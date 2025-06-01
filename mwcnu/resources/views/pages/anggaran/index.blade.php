@@ -42,80 +42,114 @@
                     </div>
                 </form>
 
-                <a href="{{ route('anggaran.create') }}"
-                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm rounded-full shadow-md transition duration-150 whitespace-nowrap">
-                    <i class="fas fa-plus"></i>
-                    <span>Tambah Anggaran</span>
-                </a>
+                @auth
+                    @php
+                        $user = auth()->user();
+                        $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+                    @endphp
+
+                    @if ($user->role_id == 1 || $isSekretaris)
+                        <a href="{{ route('anggaran.create') }}"
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm rounded-full shadow-md transition duration-150 whitespace-nowrap">
+                            <i class="fas fa-plus"></i>
+                            <span>Tambah Anggaran</span>
+                        </a>
+                    @endif
+                @endauth
+
             </div>
         </div>
 
-        <div class="bg-white shadow-md rounded-xl overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left min-w-[600px] md:min-w-full">
-                    <thead class="bg-gray-100 text-gray-700 uppercase tracking-wide text-xs">
-                        <tr>
-                            <th class="px-4 py-3 text-center whitespace-nowrap">Pendana</th>
-                            <th class="px-4 py-3 text-center whitespace-nowrap">Jumlah</th>
-                            <th class="px-4 py-3 text-center whitespace-nowrap">Catatan</th>
-                            <th class="px-4 py-3 text-center whitespace-nowrap">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 text-gray-700">
-                        @forelse ($anggarans as $item)
-                            <tr class="hover:bg-gray-50 transition duration-150">
-                                <td class="px-4 py-3 text-center whitespace-nowrap">{{ $item->pendana }}</td>
-                                <td class="px-4 py-3 text-center whitespace-nowrap">
-                                    Rp {{ number_format($item->jumlah, 0, ',', '.') }}
-                                </td>
-                                <td class="px-4 py-3 text-center whitespace-nowrap">{{ $item->catatan ?? '-' }}</td>
-                                <td class="px-4 py-3 text-center whitespace-nowrap">
-                                    <div class="flex justify-center gap-2">
-                                        <a href="{{ route('anggaran.edit', $item->id) }}"
-                                            class="inline-flex items-center justify-center w-9 h-9 rounded-full text-white shadow transition"
-                                            style="background-color: #facc15;" aria-label="Edit" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button"
-                                            onclick="confirmDelete('{{ $item->id }}', '{{ $item->pendana }}')"
-                                            aria-label="Delete"
-                                            class="inline-flex items-center justify-center w-9 h-9 rounded-full text-white shadow transition"
-                                            style="background-color: #dc2626; border-radius: 9999px;"
-                                            onmouseover="this.style.backgroundColor='#b91c1c'"
-                                            onmouseout="this.style.backgroundColor='#dc2626'" title="Hapus">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
+        @if (!request('jadwal_proker_id'))
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mt-6" role="alert">
+                <p class="font-bold">Perhatian</p>
+                <p>Silakan pilih program kerja terlebih dahulu untuk melihat data anggaran.</p>
+            </div>
+        @else
+            <div class="bg-white shadow-md rounded-xl overflow-hidden mt-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left min-w-[600px] md:min-w-full">
+                        <thead class="bg-gray-100 text-gray-700 uppercase tracking-wide text-xs">
                             <tr>
-                                <td colspan="4" class="text-center py-4 text-gray-400 italic">
-                                    Belum ada data anggaran.
+                                <th class="px-4 py-3 text-center whitespace-nowrap">Pendana</th>
+                                <th class="px-4 py-3 text-center whitespace-nowrap">Jumlah</th>
+                                <th class="px-4 py-3 text-center whitespace-nowrap">Catatan</th>
+                                @auth
+                                    @php
+                                        $user = auth()->user();
+                                        $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+                                    @endphp
+                                    @if ($user->role_id == 1 || $isSekretaris)
+                                        <th class="px-4 py-3 text-center whitespace-nowrap">Aksi</th>
+                                    @endif
+                                @endauth
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-gray-700">
+                            @forelse ($anggarans as $item)
+                                <tr class="hover:bg-gray-50 transition duration-150">
+                                    <td class="px-4 py-3 text-center whitespace-nowrap">{{ $item->pendana }}</td>
+                                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        Rp {{ number_format($item->jumlah, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-4 py-3 text-center whitespace-nowrap">{{ $item->catatan ?? '-' }}</td>
+                                    @auth
+                                    @php
+                                        $user = auth()->user();
+                                        $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+                                    @endphp
+                                    @if ($user->role_id == 1 || $isSekretaris)
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        <div class="flex justify-center gap-2">
+                                            <a href="{{ route('anggaran.edit', $item->id) }}"
+                                                class="inline-flex items-center justify-center w-9 h-9 rounded-full text-white shadow transition"
+                                                style="background-color: #facc15;" aria-label="Edit" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button"
+                                                onclick="confirmDelete('{{ $item->id }}', '{{ $item->pendana }}')"
+                                                aria-label="Delete"
+                                                class="inline-flex items-center justify-center w-9 h-9 rounded-full text-white shadow transition"
+                                                style="background-color: #dc2626; border-radius: 9999px;"
+                                                onmouseover="this.style.backgroundColor='#b91c1c'"
+                                                onmouseout="this.style.backgroundColor='#dc2626'" title="Hapus">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    @endif
+                                @endauth
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-gray-400 italic">
+                                        Belum ada data anggaran.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-gray-100 font-semibold text-gray-700 text-center">
+                                <td colspan="4" class="px-4 py-3 whitespace-nowrap">
+                                    Total: Rp {{ number_format($anggarans->sum('jumlah'), 0, ',', '.') }}
                                 </td>
                             </tr>
-                        @endforelse
-                    </tbody>
-                    <tfoot>
-                        <tr class="bg-gray-100 font-semibold text-gray-700 text-center">
-                            <td colspan="4" class="px-4 py-3 whitespace-nowrap">
-                                Total: Rp {{ number_format($anggarans->sum('jumlah'), 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
-        </div>
+           
+            <div class="mt-4 flex justify-center px-2 md:px-0">
+                @if ($anggarans->isNotEmpty())
+                    <a href="{{ route('anggaran.downloadPdf', ['jadwal_proker_id' => request('jadwal_proker_id')]) }}"
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm rounded-full shadow-md transition duration-150 whitespace-nowrap">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Download PDF</span>
+                    </a>
+                @endif
+            </div>
+        @endif
 
-        <div class="mt-4 flex justify-center px-2 md:px-0">
-            @if ($anggarans->isNotEmpty())
-                <a href="{{ route('anggaran.downloadPdf', ['jadwal_proker_id' => request('jadwal_proker_id')]) }}"
-                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm rounded-full shadow-md transition duration-150 whitespace-nowrap">
-                    <i class="fas fa-file-pdf"></i>
-                    <span>Download PDF</span>
-                </a>
-            @endif
-        </div>
     </div>
 
     <script>
