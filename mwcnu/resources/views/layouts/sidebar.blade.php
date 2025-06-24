@@ -38,8 +38,7 @@
             <span>Dashboard</span></a>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
+    <hr class="sidebar-divider my-0">
 
     <li class="nav-item {{ request()->is('anggota') ? 'active' : '' }}">
         <a class="nav-link" href="/anggota">
@@ -47,43 +46,7 @@
             <span>Anggota</span>
         </a>
     </li>
-
-    @auth
-        @php
-            $user = auth()->user();
-            $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
-        @endphp
-        @if ($user->role_id == 1 || $isSekretaris)
-            <li class="nav-item {{ request()->is('account-request') ? 'active' : '' }}">
-                <a class="nav-link" href="/account-request">
-                    <i class="fas fa-fw fa-user"></i>
-                    <span>Pengajuan Akun</span>
-                    <span id="accountRequestBadge" class="badge badge-danger badge-counter" style="display: none;"></span>
-                </a>
-            </li>
-        @endif
-    @endauth
-
-    <script>
-        function fetchAccountRequests() {
-            fetch('/count-submitted-users')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.getElementById('accountRequestBadge');
-                    if (data.count > 0) {
-                        badge.style.display = 'inline-block';
-                        badge.textContent = data.count;
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        document.addEventListener('DOMContentLoaded', fetchAccountRequests);
-
-        setInterval(fetchAccountRequests, 600000);
-    </script>
+    <hr class="sidebar-divider my-0">
 
     <li class="nav-item {{ request()->is('proker') ? 'active' : '' }}">
         <a class="nav-link" href="/proker">
@@ -91,6 +54,15 @@
             <span>Program kerja</span>
         </a>
     </li>
+
+    <li class="nav-item {{ request()->is('data-proker') ? 'active' : '' }}">
+        <a class="nav-link" href="/data-proker">
+            <i class="fas fa-fw fa-list"></i>
+            <span>Data Program Kerja</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider my-0">
 
     @auth
         @if (auth()->user()->role_id == 1)
@@ -105,7 +77,6 @@
     @endauth
 
     <script>
-        // Fungsi untuk mengambil jumlah pengajuan
         function fetchProkerRequests() {
             fetch('/count-submitted-proker')
                 .then(response => response.json())

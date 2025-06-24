@@ -1,143 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MWCNU - Login</title>
+    @vite('resources/css/app.css')
 
-    <!-- Font Awesome -->
-    <link href="{{ asset('template/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700" rel="stylesheet">
-
-    <!-- SB Admin 2 CSS -->
-    <link href="{{ asset('template/css/sb-admin-2.min.css') }}" rel="stylesheet">
-
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
-
-    <style>
-        .bg-success-custom {
-            background: linear-gradient(90deg, #28a745 0%, #218838 100%);
-        }
-
-        .form-control-user {
-            border-radius: 10rem;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #aaa;
-            z-index: 10;
-        }
-    </style>
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
-<body class="bg-success-custom">
+<body class="bg-gradient-to-r from-green-500 to-green-700 min-h-screen flex items-center justify-center">
 
-    <div class="container">
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: @json(session('success')),
+                didClose: () => window.location.href = "/dashboard"
+            });
+        </script>
+    @endif
 
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                html: `{!! implode('<br>', $errors->all()) !!}`
+            });
+        </script>
+    @endif
 
-            <div class="col-xl-10 col-lg-12 col-md-9">
+    <div class="bg-white shadow-xl rounded-2xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
+        <div class="hidden md:flex md:w-1/2 items-center justify-center bg-white p-8">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo MWCNU" class="max-h-60">
+        </div>
+        <div class="w-full md:w-1/2 p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">Selamat Datang</h2>
+            <p class="text-sm text-gray-500 mb-6 text-center">Silakan login untuk melanjutkan</p>
 
-                <div class="card border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        
-                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
+            <form action="/login" method="POST" class="space-y-5">
+                @csrf
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" name="email" id="email" placeholder="Email..."
+                        class="w-full h-11 px-4 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+                </div>
 
-                        @if(session('success'))
-                            <script>
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: @json(session('success')),
-                                    didClose: () => {
-                                        window.location.href = "/dashboard";
-                                    }
-                                });
-                            </script>
-                        @endif
-
-                        @if($errors->any())
-                            <script>
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal!',
-                                    html: `{!! implode('<br>', $errors->all()) !!}`
-                                });
-                            </script>
-                        @endif
-
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block p-5 text-center">
-                                <img src="{{ asset('assets/images/logo.png') }}" alt="Logo MWCNU" class="img-fluid"
-                                    style="max-height: 300px;">
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-center mb-4">
-                                        <h1 class="h4 text-gray-900">Selamat Datang</h1>
-                                        <p class="text-muted">Silakan login untuk melanjutkan</p>
-                                    </div>
-                                    <form class="user" action="/login" method="POST">
-                                        @csrf
-                                        <div class="form-group">
-                                            <input type="email" class="form-control form-control-user" id="inputEmail"
-                                                name="email" placeholder="Email..." required>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <input type="password" class="form-control form-control-user"
-                                                id="inputPassword" name="password" placeholder="Password" required>
-                                            <span toggle="#inputPassword" class="fas fa-eye password-toggle"></span>
-                                        </div>
-                                        <button type="submit" class="btn btn-success btn-user btn-block">
-                                            Login
-                                        </button>
-                                    </form>
-                                    <hr>
-                                    <div class="text-center">
-                                        <a class="small text-success" href="/register">Buat Akun Baru</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <div class="relative mt-1">
+                        <input type="password" name="password" id="password" placeholder="Password"
+                            class="w-full h-11 px-4 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+                        <button type="button" onclick="togglePassword()"
+                            class="absolute right-3 top-2.5 text-gray-600 hover:text-gray-800 z-10">
+                            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-            </div>
-
+                <div class="text-center">
+                    <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200 w-full">
+                        Login
+                    </button>
+                </div>
+            </form>
         </div>
-
     </div>
 
-    <!-- JS Assets -->
-    <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('template/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('template/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-    <script src="{{ asset('template/js/sb-admin-2.min.js') }}"></script>
-
-    <!-- Password Toggle Script -->
     <script>
-        $(document).on('click', '.password-toggle', function () {
-            let input = $('#inputPassword');
-            let icon = $(this);
-            if (input.attr('type') === 'password') {
-                input.attr('type', 'text');
-                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.getElementById("eyeIcon");
+
+            const showIcon =
+                `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+
+            const hideIcon =
+                `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 012.274-3.61m3.02-2.227A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.96 9.96 0 01-4.143 5.045M15 12a3 3 0 01-3 3m0-6a3 3 0 013 3m-6 0a3 3 0 003 3m0 0l-6-6" />`;
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.innerHTML = hideIcon;
             } else {
-                input.attr('type', 'password');
-                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                input.type = "password";
+                icon.innerHTML = showIcon;
             }
-        });
+        }
     </script>
 
 </body>

@@ -6,22 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
     public function up(): void
     {
         Schema::create('anggotas', function (Blueprint $table) {
             $table->id();
             $table->string('name',100);
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('role_id');
+            $table->unsignedBigInteger('ranting_id');
             $table->string('phone',15);
-            $table->enum('jabatan', ['mustasyar','syuriyah','ross syuriah','katib','awan','tanfidiyah','wakil ketua','sekertaris','bendahara','anggota']);
-            $table->enum('ranting', ['karang tengah','karang mulya','karang timur','pedurenan','pondok bahar','pondok pucung','parung jaya']);
             $table->enum('status', ['active','inactive']);
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
+            $table->foreign('ranting_id')->references('id')->on('rantings')->onDelete('cascade');
         });
     }
     

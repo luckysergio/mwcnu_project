@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anggota;
+use App\Models\Ranting;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -11,174 +13,165 @@ use Illuminate\Validation\Rule;
 
 class AnggotaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $query = Anggota::query();
+        $rantings = Ranting::orderBy('kelurahan')->get();
 
-        if (request('ranting')) {
-            $query->where('ranting', request('ranting'));
+        $query = Anggota::select('anggotas.*')
+            ->with(['user', 'role', 'ranting'])
+            ->join('roles', 'anggotas.role_id', '=', 'roles.id')
+            ->orderBy('roles.jabatan');
+
+        if ($request->ranting) {
+            $query->whereHas('ranting', function ($q) use ($request) {
+                $q->where('kelurahan', $request->ranting);
+            });
         }
 
-        $anggotas = $query->orderByRaw("FIELD(jabatan, 'mustasyar','syuriyah','ross syuriah','katib','awan','tanfidiyah','wakil ketua','sekertaris','bendahara','anggota')")
-            ->get();
+        $anggotas = $query->paginate(10);
 
-        return view('pages.anggota.index', compact('anggotas'));
+        return view('pages.anggota.index', compact('anggotas', 'rantings'));
     }
 
     public function create()
     {
-        return view('pages.anggota.create');
+        $roles = Role::orderBy('jabatan')->get();
+        $rantings = Ranting::orderBy('kelurahan')->get();
+
+        return view('pages.anggota.create', compact('roles', 'rantings'));
     }
 
     public function store(Request $request)
     {
         try {
-            $request->validate(
-                [
-                    'name' => 'required|string|max:100',
-                    // 'email' => 'required|string|email|max:100|unique:anggotas',
-                    'phone' => 'required|string|min:10|max:15',
-                    'jabatan' => 'required|in:mustasyar,syuriyah,ross syuriah,katib,awan,tanfidiyah,wakil ketua,sekertaris,bendahara,anggota',
-                    'ranting' => 'required|in:karang tengah,karang mulya,karang timur,pedurenan,pondok bahar,pondok pucung,parung jaya',
-                    'status' => 'required|in:active,inactive',
-                ],
-                [
-                    'name.required' => 'Nama harus diisi',
-                    // 'email.required' => 'Email harus diisi',
-                    // 'email.unique' => 'Email sudah terdaftar',
-                    'phone.required' => 'Nomor Handphone harus diisi',
-                    'jabatan.required' => 'Jabatan harus dipilih',
-                    'ranting.required' => 'ranting harus dipilih',
-                    'status.required' => 'status harus dipilih',
-                ]
-            );
-
-            $anggota = Anggota::create([
-                'name' => $request->name,
-                // 'email' => $request->email,
-                'phone' => $request->phone,
-                'jabatan' => $request->jabatan,
-                'ranting' => $request->ranting,
-                'status' => $request->status,
+            $request->validate([
+                'name' => 'required|string|max:100',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|min:6',
+                'phone' => 'required|string|min:10|max:15',
+                'role_id' => 'required',
+                'ranting_id' => 'required',
+                'status' => 'required|in:active,inactive',
+                'new_role' => 'nullable|string|max:50',
+                'new_ranting' => 'nullable|string|max:50',
             ]);
 
-            return redirect('anggota/create')->with('success', 'Berhasil menambahkan data');
+            if ($request->role_id === 'new') {
+                if (!$request->new_role) {
+                    return back()->withErrors(['new_role' => 'Nama role baru harus diisi']);
+                }
+                $role = Role::create(['jabatan' => $request->new_role]); // ✅ FIX
+                $role_id = $role->id;
+            } else {
+                $role_id = $request->role_id;
+            }
+
+            if ($request->ranting_id === 'new') {
+                if (!$request->new_ranting) {
+                    return back()->withErrors(['new_ranting' => 'Nama ranting baru harus diisi']);
+                }
+                $ranting = Ranting::create(['kelurahan' => $request->new_ranting]); // ✅ FIX
+                $ranting_id = $ranting->id;
+            } else {
+                $ranting_id = $request->ranting_id;
+            }
+
+            $user = User::create([
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            Anggota::create([
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'status' => $request->status,
+                'user_id' => $user->id,
+                'role_id' => $role_id,
+                'ranting_id' => $ranting_id,
+            ]);
+
+            return back()->with('success', 'Berhasil menambahkan anggota, user, role/ranting jika baru.');
         } catch (Exception $e) {
-            return redirect('anggota/create')->withErrors(['error' => $e->getMessage()]);
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     public function edit($id)
     {
         $anggota = Anggota::with('user')->findOrFail($id);
+        $roles = Role::orderBy('jabatan')->get();
+        $rantings = Ranting::orderBy('kelurahan')->get();
 
-        $users = $anggota->user ? collect() : User::whereDoesntHave('anggota')->get();
-
-        return view('pages.anggota.edit', [
-            'anggota' => $anggota,
-            'users' => $users,
-        ]);
+        return view('pages.anggota.edit', compact('anggota', 'roles', 'rantings'));
     }
 
     public function update(Request $request, $id)
     {
-        try {
-            $anggota = Anggota::with('user')->findOrFail($id);
+        $anggota = Anggota::with('user')->findOrFail($id);
 
-            $rules = [
-                'name' => 'required|string|max:100',
-                'phone' => 'required|string|min:10|max:15',
-                'jabatan' => 'required|in:mustasyar,syuriah,ross syuriah,katib,awan,tanfidiyah,wakil ketua,sekertaris,bendahara,anggota',
-                'ranting' => 'required|in:karang tengah,karang mulya,karang timur,pedurenan,pondok bahar,pondok pucung,parung jaya',
-                'status' => 'required|in:active,inactive',
-            ];
-
-            if ($anggota->user) {
-                $rules += [
-                    'user_name' => 'required|string|max:100',
-                    'user_email' => 'required|email|unique:users,email,' . $anggota->user->id,
-                    'user_password' => 'nullable|string|min:6',
-                ];
-            } else {
-                $rules['user_id'] = 'required|exists:users,id';
-            }
-
-            $validatedData = $request->validate($rules);
-
-            $anggota->update([
-                'name' => $validatedData['name'],
-                'phone' => $validatedData['phone'],
-                'jabatan' => $validatedData['jabatan'],
-                'ranting' => $validatedData['ranting'],
-                'status' => $validatedData['status'],
-            ]);
-
-            if ($anggota->user) {
-                $userUpdate = [
-                    'name' => $validatedData['user_name'],
-                    'email' => $validatedData['user_email'],
-                ];
-
-                if (!empty($validatedData['user_password'])) {
-                    $userUpdate['password'] = Hash::make($validatedData['user_password']);
-                }
-
-                $anggota->user->update($userUpdate);
-            } else {
-                $user = User::findOrFail($validatedData['user_id']);
-
-                if ($user->anggota) {
-                    return redirect("/anggota/{$id}")->withErrors(['user_id' => 'User sudah tertaut ke anggota lain.']);
-                }
-
-                $anggota->user_id = $user->id;
-                $anggota->save();
-
-                $user->status = 'approved';
-                $user->save();
-            }
-
-            return redirect("/anggota/{$id}")->with('success', 'Berhasil mengubah data anggota.');
-        } catch (Exception $e) {
-            return redirect("/anggota/{$id}")->withErrors(['error' => $e->getMessage()]);
-        }
-    }
-
-    public function linkUserForm($anggotaId)
-    {
-        $anggota = Anggota::findOrFail($anggotaId);
-
-        $availableUsers = User::whereDoesntHave('anggota')->get();
-
-        return view('pages.anggota.link-user', [
-            'anggota' => $anggota,
-            'users' => $availableUsers,
-        ]);
-    }
-
-    public function linkUser(Request $request, $anggotaId)
-    {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'name' => 'required|string|max:100',
+            'phone' => 'required|string|min:10|max:15',
+            'status' => 'required|in:active,inactive',
+            'role_id' => 'required',
+            'ranting_id' => 'required',
+            'new_role' => 'nullable|string|max:50',
+            'new_ranting' => 'nullable|string|max:50',
+            'user_email' => $anggota->user ? [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($anggota->user->id),
+            ] : 'nullable|email|unique:users,email',
+            'user_password' => 'nullable|string|min:6',
+            'user_id' => !$anggota->user ? 'nullable|exists:users,id' : 'nullable'
         ]);
 
-        $anggota = Anggota::findOrFail($anggotaId);
-
-        $user = User::findOrFail($request->user_id);
-        if ($user->anggota) {
-            return redirect()->back()->withErrors(['user_id' => 'User ini sudah tertaut dengan anggota lain.']);
+        if ($request->role_id === 'new') {
+            if (!$request->new_role) {
+                return back()->withErrors(['new_role' => 'Nama role baru harus diisi']);
+            }
+            $role = Role::create(['jabatan' => $request->new_role]);
+            $role_id = $role->id;
+        } else {
+            $role_id = $request->role_id;
         }
 
-        $anggota->update(['user_id' => $user->id]);
+        if ($request->ranting_id === 'new') {
+            if (!$request->new_ranting) {
+                return back()->withErrors(['new_ranting' => 'Nama ranting baru harus diisi']);
+            }
+            $ranting = Ranting::create(['kelurahan' => $request->new_ranting]);
+            $ranting_id = $ranting->id;
+        } else {
+            $ranting_id = $request->ranting_id;
+        }
 
-        return redirect("/anggota/{$anggotaId}")->with('success', 'Berhasil menautkan akun ke anggota.');
+        if ($anggota->user) {
+            $anggota->user->email = $request->user_email;
+            if ($request->filled('user_password')) {
+                $anggota->user->password = Hash::make($request->user_password);
+            }
+            $anggota->user->save();
+        } elseif ($request->filled('user_id')) {
+            $anggota->user_id = $request->user_id;
+        }
+
+        $anggota->update([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'status' => $request->status,
+            'role_id' => $role_id,
+            'ranting_id' => $ranting_id,
+        ]);
+
+        return back()->with('success', 'Data anggota berhasil diperbarui');
     }
 
     public function destroy($id)
     {
-        $anggotas = Anggota::findOrFail($id);
-        $anggotas->delete();
+        $anggota = Anggota::findOrFail($id);
+        $anggota->delete();
 
-        return redirect('/anggota')->with('success', 'Data berhasil dihapus');
+        return back()->with('success', 'Data berhasil dihapus');
     }
 }

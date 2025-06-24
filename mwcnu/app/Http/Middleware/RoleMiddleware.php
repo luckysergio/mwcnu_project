@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Role;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,16 +16,24 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!Auth::check()) 
-        {
-            return redirect('/')->withErrors(['email'=>'Silahkan login terlebih dahulu']);
+        if (!Auth::check()) {
+            return redirect()->route('login')->withErrors([
+                'email' => 'Silakan login terlebih dahulu'
+            ]);
         }
 
-        $roleName = Role::find(Auth::user()->role_id)->name;
+        $user = Auth::user();
 
-        if(!in_array($roleName, $roles)) {
-            return back();
+        if (!$user->anggota || !$user->anggota->role) {
+            abort(403, 'Akses ditolak: Role tidak ditemukan.');
         }
+
+        $jabatan = $user->anggota->role->jabatan;
+
+        if (!in_array($jabatan, $roles)) {
+            abort(403, 'Anda tidak memiliki akses untuk halaman ini.');
+        }
+
         return $next($request);
     }
 }

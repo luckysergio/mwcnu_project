@@ -34,16 +34,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            $userStatus = Auth::user()->status;
-
-            if ($userStatus == 'submitted') {
-                // $this->_logout($request);
-                return back()->withErrors(['email' => 'Akun anda belum aktif, silahkan hubungi admin!']);
-            } else if ($userStatus == 'rejected') {
-                // $this->_logout($request);
-                return back()->withErrors(['email' => 'Akun anda telah ditolak oleh admin']);
-            }
-
             return redirect('/')->with('success', 'Berhasil login, Selamat datang kembali');
         }
 
@@ -81,27 +71,5 @@ class AuthController extends Controller
         return view('pages.auth.register');
     }
 
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => ['required'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required'],
-        ], [
-            'name.required' => 'Nama wajib diisi.',
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar, silakan gunakan email lain.',
-            'password.required' => 'Password wajib diisi.',
-        ]);
-
-        $user = new User();
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->password = Hash::make($validated['password']);
-        $user->role_id = 2;
-        $user->saveOrFail();
-
-        return redirect('/register')->with('success', 'Berhasil mendaftar akun, menunggu persetujuan admin');
-    }
+    
 }

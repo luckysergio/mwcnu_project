@@ -1,160 +1,133 @@
 @extends('layouts.app')
 
 @section('content')
-
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
 
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <form action="{{ url('/anggota/' . $anggota->id) }}" method="POST" class="needs-validation" novalidate>
-                @csrf
-                @method('PUT')
+    <div class="max-w-3xl mx-auto mt-10">
+        <form action="{{ route('anggota.update', $anggota->id) }}" method="POST"
+            class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4">
+            @csrf
+            @method('PUT')
 
-                <div class="card shadow">
-                    <div class="card-body">
-                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
+            @if (session('success'))
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: @json(session('success')),
+                        didClose: () => window.location.href = "/anggota"
+                    });
+                </script>
+            @endif
 
-                        @if (session('success'))
-                            <script>
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: @json(session('success')),
-                                    didClose: () => {
-                                        window.location.href = "/anggota";
-                                    }
-                                });
-                            </script>
-                        @endif
+            @if ($errors->any())
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        html: `{!! implode('<br>', $errors->all()) !!}`
+                    });
+                </script>
+            @endif
 
-                        @if ($errors->any())
-                            <script>
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal!',
-                                    html: `{!! implode('<br>', $errors->all()) !!}`
-                                });
-                            </script>
-                        @endif
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Nama Lengkap</label>
+                <input type="text" name="name" value="{{ old('name', $anggota->name) }}"
+                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('name')  @else border-gray-300 @enderror">
+            </div>
 
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Nama Lengkap</label>
-                            <input type="text" name="name" id="name" class="form-control"
-                                value="{{ old('name', $anggota->name) }}">
-                        </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Nomor Handphone</label>
+                <input type="text" name="phone" value="{{ old('phone', $anggota->phone) }}"
+                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('phone')  @else border-gray-300 @enderror">
+            </div>
 
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Nomor Handphone</label>
-                            <input type="text" name="phone" id="phone" class="form-control"
-                                value="{{ old('phone', $anggota->phone) }}">
-                        </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Jabatan (Role)</label>
+                <select name="role_id"
+                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('role_id')  @else border-gray-300 @enderror">
+                    <option disabled value="">Pilih Jabatan</option>
+                    @foreach ($roles as $role)
+                        <option value="{{ $role->id }}"
+                            {{ old('role_id', $anggota->role_id) == $role->id ? 'selected' : '' }}>
+                            {{ ucfirst($role->jabatan) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-                        <div class="mb-3">
-                            <label for="jabatan" class="form-label">Jabatan</label>
-                            <select name="jabatan" id="jabatan"
-                                class="form-control @error('jabatan') is-invalid @enderror">
-                                <option disabled value="">Pilih Jabatan</option>
-                                @foreach (['mustasyar', 'syuriah', 'ross syuriah', 'katib', 'awan', 'tanfidiyah', 'wakil ketua', 'sekertaris', 'bendahara', 'anggota'] as $value)
-                                    <option value="{{ $value }}"
-                                        {{ old('jabatan', $anggota->jabatan) == $value ? 'selected' : '' }}>
-                                        {{ ucfirst($value) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('jabatan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Ranting</label>
+                <select name="ranting_id"
+                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('ranting_id')  @else border-gray-300 @enderror">
+                    <option disabled value="">Pilih Ranting</option>
+                    @foreach ($rantings as $ranting)
+                        <option value="{{ $ranting->id }}"
+                            {{ old('ranting_id', $anggota->ranting_id) == $ranting->id ? 'selected' : '' }}>
+                            {{ ucwords($ranting->kelurahan) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-                        <div class="mb-3">
-                            <label for="ranting" class="form-label">Ranting</label>
-                            <select name="ranting" id="ranting"
-                                class="form-control @error('ranting') is-invalid @enderror">
-                                <option disabled value="">Pilih Ranting</option>
-                                @foreach (['karang tengah', 'karang mulya', 'karang timur', 'pedurenan', 'pondok bahar', 'pondok pucung', 'parung jaya'] as $value)
-                                    <option value="{{ $value }}"
-                                        {{ old('ranting', $anggota->ranting) == $value ? 'selected' : '' }}>
-                                        {{ ucwords($value) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('ranting')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                <select name="status"
+                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('status')  @else border-gray-300 @enderror">
+                    <option disabled value="">Pilih Status</option>
+                    <option value="active" {{ old('status', $anggota->status) == 'active' ? 'selected' : '' }}>Active
+                    </option>
+                    <option value="inactive" {{ old('status', $anggota->status) == 'inactive' ? 'selected' : '' }}>Inactive
+                    </option>
+                </select>
+            </div>
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select name="status" id="status"
-                                class="form-control @error('status') is-invalid @enderror">
-                                <option disabled value="">Pilih Status</option>
-                                <option value="active" {{ old('status', $anggota->status) == 'active' ? 'selected' : '' }}>
-                                    Active</option>
-                                <option value="inactive"
-                                    {{ old('status', $anggota->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+            @if ($anggota->user)
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    <input type="email" name="user_email" value="{{ old('user_email', $anggota->user->email) }}"
+                        class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
 
-                        <hr>
-
-                        @if ($anggota->user)
-                            <div class="mb-3">
-                                <label for="user_name" class="form-label">Nama User</label>
-                                <input type="text" name="user_name" id="user_name" class="form-control"
-                                    value="{{ old('user_name', $anggota->user->name) }}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="user_email" class="form-label">Email</label>
-                                <input type="email" name="user_email" id="user_email" class="form-control"
-                                    value="{{ old('user_email', $anggota->user->email) }}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="user_password" class="form-label">Password (kosongkan jika tidak diubah)</label>
-                                <div class="input-group">
-                                    <input type="password" name="user_password" id="user_password" class="form-control"
-                                        autocomplete="off">
-                                    <span class="input-group-text bg-white border-start-0">
-                                        <i class="fa fa-eye" id="toggleIcon" style="cursor: pointer;"
-                                            onclick="togglePassword()"></i>
-                                    </span>
-                                </div>
-                            </div>
-                        @else
-                            <div class="mb-3">
-                                <label for="user_id" class="form-label">Tautkan Akun User</label>
-                                <select name="user_id" id="user_id"
-                                    class="form-control @error('user_id') is-invalid @enderror">
-                                    <option value="">-- Pilih User --</option>
-                                    @foreach ($users as $user)
-                                        <option value="{{ $user->id }}"
-                                            {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }} ({{ $user->email }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('user_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        @endif
-                    </div>
-                    <div class="card-footer bg-white d-flex justify-content-end">
-                        <button type="submit" class="btn btn-success">Simpan</button>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Password (kosongkan jika tidak diubah)</label>
+                    <div class="relative">
+                        <input type="password" name="user_password" id="user_password"
+                            class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <button type="button" id="togglePassword" class="absolute right-3 top-2.5 text-gray-500">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
                     </div>
                 </div>
-            </form>
-        </div>
+            @else
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Tautkan Akun User</label>
+                    <select name="user_id"
+                        class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">-- Pilih User --</option>
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                {{ $user->name }} ({{ $user->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
+            <div class="flex items-center justify-center">
+                <button type="submit"
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Simpan
+                </button>
+            </div>
+        </form>
     </div>
 
     <script>
-        function togglePassword() {
+        document.getElementById('togglePassword').addEventListener('click', function() {
             const input = document.getElementById('user_password');
-            const icon = document.getElementById('toggleIcon');
+            const icon = this.querySelector('i');
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -164,9 +137,6 @@
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
-        }
+        });
     </script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
 @endsection

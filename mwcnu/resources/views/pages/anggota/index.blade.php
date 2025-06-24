@@ -6,9 +6,9 @@
     @auth
         @php
             $user = auth()->user();
-            $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
+            $canManage = in_array($user->anggota?->role?->jabatan, ['Admin', 'Tanfidiyah']);
         @endphp
-        @if ($user->role_id == 1 || $isSekretaris)
+        @if ($canManage)
             <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                 <h1 class="text-3xl font-bold text-gray-900">Data Anggota</h1>
                 <a href="/anggota/create"
@@ -49,9 +49,9 @@
         <select name="ranting" id="rantingSelect" onchange="this.form.submit()"
             class="w-full max-w-xs px-4 py-3 bg-white border border-gray-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition text-gray-700">
             <option value="">Semua Ranting</option>
-            @foreach (['karang tengah', 'karang mulya', 'karang timur', 'pedurenan', 'pondok bahar', 'pondok pucung', 'parung jaya'] as $r)
-                <option value="{{ $r }}" {{ request('ranting') == $r ? 'selected' : '' }}>
-                    {{ ucfirst($r) }}
+            @foreach ($rantings as $ranting)
+                <option value="{{ $ranting->kelurahan }}" {{ request('ranting') == $ranting->kelurahan ? 'selected' : '' }}>
+                    {{ ucfirst($ranting->kelurahan) }}
                 </option>
             @endforeach
         </select>
@@ -69,11 +69,7 @@
                         <th class="px-6 py-4 text-center">Ranting</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         @auth
-                            @php
-                                $user = auth()->user();
-                                $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
-                            @endphp
-                            @if ($user->role_id == 1 || $isSekretaris)
+                            @if ($canManage)
                                 <th class="px-6 py-4 text-center">Aksi</th>
                             @endif
                         @endauth
@@ -87,8 +83,9 @@
                                 {{ $item->user?->email ?? 'akun belum tertaut' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">{{ $item->phone }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ $item->jabatan }}</td>
-                            <td class="px-6 py-4 capitalize whitespace-nowrap text-center">{{ $item->ranting }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ $item->role->jabatan ?? '-' }}</td>
+                            <td class="px-6 py-4 capitalize whitespace-nowrap text-center">
+                                {{ ucfirst($item->ranting->kelurahan ?? '-') }}</td>
                             <td class="px-6 py-4 text-center">
                                 <span
                                     class="inline-block px-3 py-1 rounded-full text-xs font-semibold text-white 
@@ -97,11 +94,7 @@
                                 </span>
                             </td>
                             @auth
-                                @php
-                                    $user = auth()->user();
-                                    $isSekretaris = $user->anggota?->jabatan === 'sekertaris';
-                                @endphp
-                                @if ($user->role_id == 1 || $isSekretaris)
+                                @if ($canManage)
                                     <td class="px-6 py-4 text-center whitespace-nowrap">
                                         <div class="flex justify-center gap-2">
                                             <a href="/anggota/{{ $item->id }}"
@@ -134,6 +127,9 @@
         </div>
     </div>
 
+    <div class="px-6 pb-6">
+    {{ $anggotas->withQueryString()->links() }}
+    </div>
 
     <script>
         function confirmDelete(id, name) {

@@ -3,29 +3,35 @@
 use App\Http\Controllers\AnggaranController;
 use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DataProkerController;
 use App\Http\Controllers\JadwalProkerController;
 use App\Http\Controllers\ProkerController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', [AuthController::class, 'login']);
+Route::get('/', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/register', [AuthController::class, 'registerView']);
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::get('/dashboard', function () {
-    return view('pages.dashboard');
-})->middleware('role:Admin,User');
-Route::get('/dashboard', [JadwalProkerController::class, 'show'])->middleware('role:Admin,User');
+Route::get('/data-proker', [DataProkerController::class, 'index'])->name('data-proker.index');
 
-Route::get('/anggota', [AnggotaController::class, 'index'])->middleware('role:Admin,User');
-Route::get('/anggota/create', [AnggotaController::class, 'create'])->middleware('role:Admin,User');
-Route::get('/anggota/{id}', [AnggotaController::class, 'edit'])->middleware('role:Admin,User');
-Route::post('/anggota', [AnggotaController::class, 'store'])->middleware('role:Admin,User');
-Route::put('/anggota/{id}', [AnggotaController::class, 'update'])->middleware('role:Admin,User');
-Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy'])->middleware('role:Admin,User');
+Route::get('/data-proker', [DataProkerController::class, 'index'])->name('data-proker.index');
+Route::get('/data-proker/create', [DataProkerController::class, 'create'])->name('data-proker.create');
+Route::post('/data-proker', [DataProkerController::class, 'store'])->name('data-proker.store');
+
+Route::get('/dashboard', [JadwalProkerController::class, 'show'])->middleware('auth');
+
+Route::get('/anggota', [AnggotaController::class, 'index'])->middleware('auth');
+
+Route::middleware(['auth', 'role:Admin,Tanfidiyah'])->group(function () {
+    Route::get('/anggota/create', [AnggotaController::class, 'create']);
+    Route::post('/anggota', [AnggotaController::class, 'store'])->name('anggota.store');
+    Route::get('/anggota/{id}', [AnggotaController::class, 'edit'])->name('anggota.update');
+    Route::put('/anggota/{id}', [AnggotaController::class, 'update']);
+    Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy']);
+});
 
 Route::get('/anggota/{id}/link-user', [AnggotaController::class, 'linkUserForm'])->name('anggota.link-user.form');
 Route::post('/anggota/{id}/link-user', [AnggotaController::class, 'linkUser'])->name('anggota.link-user');
@@ -63,4 +69,3 @@ Route::put('/anggaran/{id}', [AnggaranController::class, 'update'])->name('angga
 Route::delete('/anggaran/{id}', [AnggaranController::class, 'destroy'])->name('anggaran.destroy');
 Route::get('/anggaran/show-jadwal', [AnggaranController::class, 'show'])->name('anggaran.showJadwal');
 Route::get('/anggaran/download-pdf', [AnggaranController::class, 'downloadPdf'])->name('anggaran.downloadPdf');
-

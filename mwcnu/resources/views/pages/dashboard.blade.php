@@ -3,10 +3,6 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    {{-- Title --}}
-    <div class="text-center mb-10">
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Monitoring Program Kerja MWCNU Karang Tengah</h2>
-    </div>
 
     {{-- === PROGRAM TERJADWAL === --}}
     <div class="text-center mb-6">

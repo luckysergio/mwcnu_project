@@ -14,23 +14,22 @@
     </div>
 
     <form method="GET" class="flex justify-center mb-8">
-        <div class="relative w-full max-w-xs">
-            <select name="status" id="statusSelect" onchange="this.form.submit()"
-                class="appearance-none w-full px-4 py-3 pr-10 bg-white border border-gray-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition text-gray-700">
-                <option value="">Semua Program Kerja</option>
-                @foreach (['pengajuan', 'di setujui', 'di tolak'] as $r)
-                    <option value="{{ $r }}" {{ request('status') == $r ? 'selected' : '' }}>
-                        {{ ucfirst($r) }}
-                    </option>
-                @endforeach
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
+    <div class="relative w-full max-w-xs">
+        <select name="status" onchange="this.form.submit()"
+            class="appearance-none w-full px-4 py-3 bg-white border border-gray-300 rounded-full shadow-md 
+                focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent 
+                text-gray-700 text-center cursor-pointer">
+            <option value="">Semua Program Kerja</option>
+            @foreach (['pengajuan', 'di setujui', 'di tolak'] as $r)
+                <option value="{{ $r }}" {{ request('status') == $r ? 'selected' : '' }}>
+                    {{ ucfirst($r) }}
+                </option>
+            @endforeach
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center">
         </div>
-    </form>
+    </div>
+</form>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
 
