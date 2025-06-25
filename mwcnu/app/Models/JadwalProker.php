@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Jadwal_proker extends Model
+class JadwalProker extends Model
 {
     protected $table = 'jadwal_prokers';
     protected $guarded = [];
 
-    // Relasi ke proker
     public function proker()
     {
         return $this->belongsTo(Proker::class);
@@ -17,11 +16,11 @@ class Jadwal_proker extends Model
 
     public function penanggungJawab()
     {
-        return $this->belongsTo(User::class, 'penanggung_jawab_id');
+        return $this->belongsTo(Anggota::class, 'penanggung_jawab_id');
     }
 
-    public function anggarans()
+    public function details()
     {
-        return $this->hasMany(Anggaran::class);
+        return $this->hasMany(JadwalProkerDetail::class);
     }
 }

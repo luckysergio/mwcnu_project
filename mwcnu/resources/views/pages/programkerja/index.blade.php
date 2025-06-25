@@ -3,115 +3,100 @@
 @section('content')
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
 
-    {{-- Header dan tombol tambah --}}
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h1 class="text-3xl font-bold text-gray-900">Data Program Kerja</h1>
         <a href="/proker/create"
-            class="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 active:from-green-700 active:to-green-800 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out border border-green-400 hover:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-200">
+            class="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm rounded-xl shadow-lg transition-all duration-200">
             <i class="fas fa-plus text-sm"></i>
             <span>Ajukan Program Kerja</span>
         </a>
     </div>
 
     <form method="GET" class="flex justify-center mb-8">
-    <div class="relative w-full max-w-xs">
-        <select name="status" onchange="this.form.submit()"
-            class="appearance-none w-full px-4 py-3 bg-white border border-gray-300 rounded-full shadow-md 
-                focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent 
-                text-gray-700 text-center cursor-pointer">
-            <option value="">Semua Program Kerja</option>
-            @foreach (['pengajuan', 'di setujui', 'di tolak'] as $r)
-                <option value="{{ $r }}" {{ request('status') == $r ? 'selected' : '' }}>
-                    {{ ucfirst($r) }}
-                </option>
-            @endforeach
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+        <div class="relative w-full max-w-xs">
+            <select name="status" onchange="this.form.submit()"
+                class="appearance-none w-full px-4 py-3 bg-white border border-gray-300 rounded-full shadow-md 
+            focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700 text-center cursor-pointer">
+                <option value="">Semua Program Kerja</option>
+                @foreach (['pengajuan', 'disetujui', 'ditolak'] as $r)
+                    <option value="{{ $r }}" {{ request('status') == $r ? 'selected' : '' }}>
+                        {{ ucfirst($r) }}
+                    </option>
+                @endforeach
+            </select>
         </div>
-    </div>
-</form>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
+    </form>
 
     @if (session('success'))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
         <script>
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
                 text: @json(session('success')),
-                didClose: () => {
-                    window.location.href = "/proker";
-                }
+                didClose: () => window.location.href = "/proker"
             });
         </script>
     @endif
 
-    <div class="bg-white shadow-md rounded-xl overflow-hidden mb-10">
-        <div class="overflow-x-auto">
-            <table class="table-auto w-full text-sm text-left">
-                <thead class="bg-gray-100 text-gray-700 uppercase tracking-wide text-xs select-none">
-                    <tr>
-                        <th class="px-4 py-3 text-center">Mengajukan</th>
-                        <th class="px-4 py-3 text-center">Program Kerja</th>
-                        <th class="px-4 py-3 text-center">Status</th>
-                        <th class="px-4 py-3 text-center">Catatan</th>
-                        @auth
-                            @if (auth()->user()->role_id == 1)
-                                <th class="px-4 py-3 text-center">Aksi</th>
-                            @endif
-                        @endauth
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 text-gray-700">
-                    @forelse ($prokers as $item)
-                        <tr class="hover:bg-gray-50 transition-colors duration-200">
-                            <td class="px-4 py-3 whitespace-nowrap text-center font-medium">{{ $item->user->name }}</td>
-                            <td class="px-4 py-3 text-center break-words whitespace-normal max-w-xs">{{ $item->program }}
-                            </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-center font-semibold text-green-600">
-                                {{ ucfirst($item->status) }}</td>
-                            <td class="px-4 py-3 text-center break-words whitespace-normal max-w-xs">
-                                {{ $item->catatan ?? '-' }}</td>
-                            @auth
-                                @if (auth()->user()->role_id == 1)
-                                    <td class="px-4 py-3 text-center whitespace-nowrap">
-                                        <div class="flex justify-center gap-2">
-                                            <a href="/proker/{{ $item->id }}"
-                                                class="inline-flex items-center justify-center w-9 h-9 rounded-full text-white shadow transition"
-                                                style="background-color: #facc15;">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button"
-                                                onclick="confirmDelete('{{ $item->id }}', '{{ $item->program }}')"
-                                                aria-label="Delete"
-                                                class="inline-flex items-center justify-center w-9 h-9 rounded-full text-white shadow transition"
-                                                style="background-color: #dc2626; border-radius: 9999px;"
-                                                onmouseover="this.style.backgroundColor='#b91c1c'"
-                                                onmouseout="this.style.backgroundColor='#dc2626'">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        @forelse ($prokers as $item)
+            <div
+                class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg p-6 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-start justify-between">
+                        <h2 class="text-lg font-bold text-gray-900 leading-snug">{{ $item->judul }}</h2>
+                        <span
+                            class="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full
+                        {{ $item->status == 'pengajuan' ? 'bg-yellow-500' : ($item->status == 'disetujui' ? 'bg-green-600' : 'bg-red-600') }}">
+                            {{ ucfirst($item->status) }}
+                        </span>
+                    </div>
 
-                                    </td>
-                                @endif
-                            @endauth
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="py-6 text-center text-gray-400 italic">Tidak ada data program kerja.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                    <p class="text-sm text-gray-600">Diajukan oleh: <strong
+                            class="text-gray-800">{{ $item->anggota->name }}</strong></p>
+
+                    <div class="text-sm text-gray-700 space-y-1">
+                        <p><strong>Bidang:</strong> {{ $item->bidang->nama }}</p>
+                        <p><strong>Jenis Kegiatan:</strong> {{ $item->jenis->nama }}</p>
+                        <p><strong>Tujuan:</strong> {{ $item->tujuan->nama }}</p>
+                        <p><strong>Sasaran:</strong> {{ $item->sasaran->nama }}</p>
+                        <p><strong>Proposal:</strong> <a href="{{ asset('storage/' . $item->proposal) }}" target="_blank"
+                                class="text-blue-600 hover:underline">Lihat</a></p>
+                        <p><strong>Keterangan:</strong> {{ $item->keterangan ?? '-' }}</p>
+                    </div>
+                </div>
+
+                @auth
+                    @php
+                        $jabatan = auth()->user()->anggota->role->jabatan ?? null;
+                    @endphp
+                    @if (in_array($jabatan, ['Admin', 'Tanfidiyah']))
+                        <div class="mt-5 flex flex-col gap-3">
+                            <a href="{{ route('proker.edit', $item->id) }}"
+                                class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm rounded-lg shadow transition">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button type="button" onclick="confirmDelete('{{ $item->id }}', '{{ $item->judul }}')"
+                                class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg shadow transition">
+                                <i class="fas fa-trash-alt"></i> Hapus
+                            </button>
+                        </div>
+                    @endif
+                @endauth
+            </div>
+        @empty
+            <div class="col-span-full text-center text-gray-400 italic">
+                Tidak ada data program kerja.
+            </div>
+        @endforelse
     </div>
 
     <script>
-        function confirmDelete(id, program) {
+        function confirmDelete(id, judul) {
             Swal.fire({
                 title: 'Hapus Data?',
-                text: `Yakin ingin menghapus program kerja "${program}"?`,
+                text: `Yakin ingin menghapus program kerja "${judul}"?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',

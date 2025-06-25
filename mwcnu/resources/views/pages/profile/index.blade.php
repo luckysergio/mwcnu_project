@@ -19,6 +19,7 @@
                                     icon: 'success',
                                     title: 'Berhasil!',
                                     text: @json(session('success')),
+                                    confirmButtonColor: '#22c55e',
                                     didClose: () => {
                                         window.location.href = "/dashboard";
                                     }
@@ -36,9 +37,9 @@
                             </script>
                         @endif
 
-                            @if (auth()->user()->anggota)
+                        @if (auth()->user()->anggota)
                             <hr>
-                            <h5 class="mb-3">Jika data anggota salah silahkan hubungi admin / seketaris</h5>
+                            <h5 class="mb-3 text-center">Jika data anggota salah, silakan hubungi Admin</h5>
 
                             <div class="mb-3">
                                 <label class="form-label">Nama Anggota</label>
@@ -53,12 +54,12 @@
                             <div class="mb-3">
                                 <label class="form-label">Jabatan</label>
                                 <input type="text" class="form-control"
-                                    value="{{ ucwords(auth()->user()->anggota->jabatan) }}" readonly>
+                                    value="{{ ucwords(auth()->user()->anggota->role->jabatan ?? '-') }}" readonly>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Ranting</label>
                                 <input type="text" class="form-control"
-                                    value="{{ ucwords(auth()->user()->anggota->ranting) }}" readonly>
+                                    value="{{ ucwords(auth()->user()->anggota->ranting->kelurahan ?? '-') }}" readonly>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Status</label>
@@ -67,11 +68,7 @@
                             </div>
                         @endif
 
-                        <div class="mb-3">
-                            <label for="user_name" class="form-label">Nama User</label>
-                            <input type="text" name="user_name" id="user_name" class="form-control"
-                                value="{{ old('user_name', auth()->user()->name) }}">
-                        </div>
+                        <hr class="my-4">
 
                         <div class="mb-3">
                             <label for="user_email" class="form-label">Email</label>
@@ -80,7 +77,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="user_password" class="form-label">Password (kosongkan jika tidak diubah)</label>
+                            <label for="user_password" class="form-label">Password (kosongkan jika tidak ingin
+                                mengubah)</label>
                             <div class="input-group">
                                 <input type="password" name="user_password" id="user_password" class="form-control"
                                     autocomplete="off">
@@ -91,8 +89,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white d-flex justify-content-end">
-                        <button type="submit" class="btn btn-success">Simpan</button>
+
+                    <div class="card-footer bg-white d-flex justify-content-center">
+                        <button type="submit" class="btn btn-success">Simpan Perubahan</button>
                     </div>
                 </div>
             </form>

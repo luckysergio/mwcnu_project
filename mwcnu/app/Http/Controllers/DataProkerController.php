@@ -20,7 +20,11 @@ class DataProkerController extends Controller
         $sasarans = Sasaran::when($search, fn($q) => $q->where('nama', 'like', "%$search%"))->paginate(10, ['*'], 'sasarans_page');
 
         return view('pages.dataproker.index', compact(
-            'bidangs', 'jenisKegiatans', 'tujuans', 'sasarans', 'search'
+            'bidangs',
+            'jenisKegiatans',
+            'tujuans',
+            'sasarans',
+            'search'
         ));
     }
 
@@ -53,5 +57,63 @@ class DataProkerController extends Controller
         }
 
         return back()->with('success', $msg);
+    }
+
+    public function update(Request $request, $type, $id)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:50'
+        ]);
+
+        $msg = '';
+        switch ($type) {
+            case 'bidang':
+                Bidang::findOrFail($id)->update(['nama' => $request->nama]);
+                $msg = 'Bidang berhasil diperbarui.';
+                break;
+            case 'jenis':
+                JenisKegiatan::findOrFail($id)->update(['nama' => $request->nama]);
+                $msg = 'Jenis Kegiatan berhasil diperbarui.';
+                break;
+            case 'tujuan':
+                Tujuan::findOrFail($id)->update(['nama' => $request->nama]);
+                $msg = 'Tujuan berhasil diperbarui.';
+                break;
+            case 'sasaran':
+                Sasaran::findOrFail($id)->update(['nama' => $request->nama]);
+                $msg = 'Sasaran berhasil diperbarui.';
+                break;
+            default:
+                abort(404);
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    public function destroy($type, $id)
+    {
+        $msg = '';
+        switch ($type) {
+            case 'bidang':
+                Bidang::destroy($id);
+                $msg = 'Bidang berhasil dihapus.';
+                break;
+            case 'jenis':
+                JenisKegiatan::destroy($id);
+                $msg = 'Jenis Kegiatan berhasil dihapus.';
+                break;
+            case 'tujuan':
+                Tujuan::destroy($id);
+                $msg = 'Tujuan berhasil dihapus.';
+                break;
+            case 'sasaran':
+                Sasaran::destroy($id);
+                $msg = 'Sasaran berhasil dihapus.';
+                break;
+            default:
+                abort(404);
+        }
+
+        return redirect()->back()->with('success', $msg);
     }
 }

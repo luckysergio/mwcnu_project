@@ -3,10 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Sasaran extends Model
 {
-    protected $table = "sasarans";
+    use HasFactory;
 
+    protected $table = 'sasarans';
     protected $guarded = [];
+
+    public function prokers()
+    {
+        return $this->hasMany(Proker::class);
+    }
 }

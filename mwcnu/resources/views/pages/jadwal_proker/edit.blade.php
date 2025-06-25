@@ -1,100 +1,100 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Edit Jadwal Program Kerja</h2>
 
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
-
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <form action="{{ url('/jadwal/' . $jadwal->id) }}" method="POST" class="needs-validation" novalidate>
+        <form action="{{ route('jadwal-proker.update', $jadwal->id) }}" method="POST">
             @csrf
             @method('PUT')
 
-            <div class="card shadow">
-                <div class="card-body">
-                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
+            {{-- === Pilih Proker === --}}
+            <div class="mb-4">
+                <label for="proker_id" class="block text-sm font-medium text-gray-700 mb-1">Program Kerja</label>
+                <select name="proker_id" id="proker_id"
+                    class="w-full border px-4 py-2 rounded @error('proker_id') border-red-500 @enderror">
+                    @foreach ($prokers as $proker)
+                        <option value="{{ $proker->id }}" {{ $proker->id == $jadwal->proker_id ? 'selected' : '' }}>
+                            {{ $proker->judul }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-                    @if(session('success'))
-                        <script>
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: @json(session('success')),
-                                didClose: () => {
-                                    window.location.href = "/jadwal";
-                                }
-                            });
-                        </script>
-                    @endif
+            {{-- === Status Jadwal === --}}
+            <div class="mb-4">
+                <label class="block mb-1 font-medium text-gray-700">Status</label>
+                <select name="status" class="w-full border px-4 py-2 rounded">
+                    @foreach (['penjadwalan', 'berjalan', 'selesai'] as $status)
+                        <option value="{{ $status }}" {{ $jadwal->status == $status ? 'selected' : '' }}>
+                            {{ ucfirst($status) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-                    @if($errors->any())
-                        <script>
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                html: `{!! implode('<br>', $errors->all()) !!}`
-                            });
-                        </script>
-                    @endif
+            {{-- === Detail Kegiatan === --}}
+            <div id="kegiatan-container">
+                @foreach ($jadwal->details as $i => $detail)
+                    <div class="bg-gray-100 p-4 mb-4 rounded-md kegiatan-item">
+                        <label class="block font-semibold">Kegiatan</label>
+                        <input type="text" name="kegiatan[]" value="{{ $detail->kegiatan }}"
+                            class="w-full border px-4 py-2 rounded mb-2" required>
 
-                    <div class="mb-3">
-                        <label for="proker_id" class="form-label">Program kerja</label>
-                        <select name="proker_id" id="proker_id" class="form-control @error('proker_id') is-invalid @enderror" disabled>
-                            @foreach($prokers as $proker)
-                                <option value="{{ $proker->id }}"
-                                    {{ old('proker_id', $jadwal->proker_id) == $proker->id ? 'selected' : '' }}>
-                                    {{ $proker->program }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('proker_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <label class="block font-semibold">Tanggal Mulai</label>
+                        <input type="date" name="tanggal_mulai[]" value="{{ $detail->tanggal_mulai }}"
+                            class="w-full border px-4 py-2 rounded mb-2" required>
+
+                        <label class="block font-semibold">Tanggal Selesai</label>
+                        <input type="date" name="tanggal_selesai[]" value="{{ $detail->tanggal_selesai }}"
+                            class="w-full border px-4 py-2 rounded mb-2" required>
+
+                        <label class="block font-semibold">Catatan</label>
+                        <textarea name="catatan[]" rows="2" class="w-full border px-4 py-2 rounded">{{ $detail->catatan }}</textarea>
+
+                        <button type="button" onclick="this.closest('.kegiatan-item').remove();"
+                            class="mt-2 text-sm text-red-500 hover:underline">Hapus Kegiatan</button>
                     </div>
-                    <div class="mb-3">
-                        <label for="tanggal_mulai" class="form-label">Tanggal mulai</label>
-                        <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control @error('tanggal_mulai') is-invalid @enderror"
-                            value="{{ old('tanggal_mulai', $jadwal->tanggal_mulai) }}">
-                        @error('tanggal_mulai')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label for="tanggal_selesai" class="form-label">Tanggal selesai</label>
-                        <input type="date" name="tanggal_selesai" id="tanggal_selesai" class="form-control @error('tanggal_selesai') is-invalid @enderror"
-                            value="{{ old('tanggal_selesai', $jadwal->tanggal_selesai) }}">
-                        @error('tanggal_selesai')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label for="catatan" class="form-label">Catatan</label>
-                        <textarea name="catatan" id="catatan" class="form-control @error('catatan') is-invalid @enderror" rows="3">{{ old('catatan', $jadwal->catatan) }}</textarea>
-                        @error('catatan')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status</label>
-                        <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
-                            <option disabled value="">Pilih Status</option>
-                            @foreach(['penjadwalan', 'berjalan', 'selesai'] as $status)
-                                <option value="{{ $status }}" {{ old('status', $jadwal->status) == $status ? 'selected' : '' }}>
-                                    {{ ucfirst($status) }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-                <div class="card-footer bg-white d-flex justify-content-end">
-                    <button type="submit" class="btn btn-success">Simpan</button>
-                </div>
+                @endforeach
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <button type="button" onclick="tambahKegiatan()"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded shadow">
+                    + Tambah Kegiatan
+                </button>
+
+                <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow">
+                    Simpan Perubahan
+                </button>
             </div>
         </form>
     </div>
-</div>
 
+    {{-- Template Kegiatan --}}
+    <template id="kegiatan-template">
+        <div class="bg-gray-100 p-4 mb-4 rounded-md kegiatan-item">
+            <label class="block font-semibold">Kegiatan</label>
+            <input type="text" name="kegiatan[]" class="w-full border px-4 py-2 rounded mb-2" required>
+
+            <label class="block font-semibold">Tanggal Mulai</label>
+            <input type="date" name="tanggal_mulai[]" class="w-full border px-4 py-2 rounded mb-2" required>
+
+            <label class="block font-semibold">Tanggal Selesai</label>
+            <input type="date" name="tanggal_selesai[]" class="w-full border px-4 py-2 rounded mb-2" required>
+
+            <label class="block font-semibold">Catatan</label>
+            <textarea name="catatan[]" rows="2" class="w-full border px-4 py-2 rounded"></textarea>
+
+            <button type="button" onclick="this.closest('.kegiatan-item').remove();"
+                class="mt-2 text-sm text-red-500 hover:underline">Hapus Kegiatan</button>
+        </div>
+    </template>
+
+    <script>
+        function tambahKegiatan() {
+            const template = document.getElementById('kegiatan-template').content.cloneNode(true);
+            document.getElementById('kegiatan-container').appendChild(template);
+        }
+    </script>
 @endsection

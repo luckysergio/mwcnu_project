@@ -46,26 +46,39 @@
             <span>Anggota</span>
         </a>
     </li>
+    @auth
+        @if (in_array(auth()->user()->anggota?->role?->jabatan, ['Admin', 'Tanfidiyah']))
+            <li class="nav-item {{ request()->is('jdr') ? 'active' : '' }}">
+                <a class="nav-link" href="/jdr">
+                    <i class="fas fa-user-friends"></i>
+                    <span>Jabatan dan Ranting</span>
+                </a>
+            </li>
+        @endif
+    @endauth
     <hr class="sidebar-divider my-0">
 
-    <li class="nav-item {{ request()->is('proker') ? 'active' : '' }}">
-        <a class="nav-link" href="/proker">
-            <i class="fas fa-fw fa-list"></i>
-            <span>Program kerja</span>
-        </a>
-    </li>
-
-    <li class="nav-item {{ request()->is('data-proker') ? 'active' : '' }}">
-        <a class="nav-link" href="/data-proker">
-            <i class="fas fa-fw fa-list"></i>
-            <span>Data Program Kerja</span>
-        </a>
-    </li>
+    @auth
+        @if (in_array(auth()->user()->anggota?->role?->jabatan, ['Admin', 'Tanfidiyah', 'Tanfidiyah ranting', 'Sekretaris']))
+            <li class="nav-item {{ request()->is('proker') ? 'active' : '' }}">
+                <a class="nav-link" href="/proker">
+                    <i class="fas fa-fw fa-list"></i>
+                    <span>Program kerja</span>
+                </a>
+            </li>
+            <li class="nav-item {{ request()->is('data-proker') ? 'active' : '' }}">
+                <a class="nav-link" href="/data-proker">
+                    <i class="fas fa-fw fa-list"></i>
+                    <span>Data Program Kerja</span>
+                </a>
+            </li>
+        @endif
+    @endauth
 
     <hr class="sidebar-divider my-0">
 
     @auth
-        @if (auth()->user()->role_id == 1)
+        @if (in_array(auth()->user()->anggota?->role?->jabatan, ['Admin', 'Tanfidiyah']))
             <li class="nav-item {{ request()->is('proker-request') ? 'active' : '' }}">
                 <a class="nav-link" href="/proker-request">
                     <i class="fas fa-fw fa-paper-plane"></i>
@@ -98,7 +111,7 @@
     </script>
 
     @auth
-        @if (auth()->user()->role_id == 1)
+        @if (in_array(auth()->user()->anggota?->role?->jabatan, ['Admin', 'Tanfidiyah']))
             <li class="nav-item {{ request()->is('jadwal') ? 'active' : '' }}">
                 <a class="nav-link d-flex justify-content-between align-items-center" href="/jadwal">
                     <div>
@@ -131,17 +144,15 @@
         setInterval(fetchBelumJadwalProker, 600000);
     </script>
 
-    <li class="nav-item {{ request()->is('anggaran') ? 'active' : '' }}">
-        <a class="nav-link" href="/anggaran">
-            <i class="fas fa-fw fa-file-invoice-dollar"></i>
-            <span>Laporan anggaran</span>
+    <li class="nav-item {{ request()->is('laporan') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('laporan.index') }}">
+            <i class="fas fa-fw fa-file-alt"></i>
+            <span>Laporan</span>
         </a>
     </li>
 
-    <!-- Divider -->
     <hr class="sidebar-divider">
 
-    <!-- Sidebar Toggler (Sidebar) -->
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
     </div>

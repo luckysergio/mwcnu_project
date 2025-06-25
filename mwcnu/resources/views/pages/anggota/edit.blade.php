@@ -57,18 +57,40 @@
                 </select>
             </div>
 
+            @php
+                $user = auth()->user();
+                $role = $user->anggota?->role?->jabatan;
+                $isRestricted = in_array($role, ['Tanfidiyah ranting', 'Sekretaris']);
+                $userRantingId = $user->anggota?->ranting_id;
+            @endphp
+
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Ranting</label>
-                <select name="ranting_id"
-                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('ranting_id')  @else border-gray-300 @enderror">
-                    <option disabled value="">Pilih Ranting</option>
-                    @foreach ($rantings as $ranting)
-                        <option value="{{ $ranting->id }}"
-                            {{ old('ranting_id', $anggota->ranting_id) == $ranting->id ? 'selected' : '' }}>
-                            {{ ucwords($ranting->kelurahan) }}
-                        </option>
-                    @endforeach
-                </select>
+                <label for="ranting_id" class="block text-gray-700 text-sm font-bold mb-2">Ranting</label>
+
+                @if ($isRestricted)
+                    <select name="ranting_id" id="ranting_id" disabled
+                        class="shadow appearance-none border w-full py-2 px-3 bg-gray-100 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        @foreach ($rantings as $ranting)
+                            @if ($ranting->id == $userRantingId)
+                                <option value="{{ $ranting->id }}" selected>{{ ucfirst($ranting->kelurahan) }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                    <input type="hidden" name="ranting_id" value="{{ $userRantingId }}">
+                @else
+                    <select name="ranting_id" id="ranting_id"
+                        class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('ranting_id') border-red-500 @else @enderror">
+                        <option disabled selected>Pilih Ranting</option>
+                        @foreach ($rantings as $ranting)
+                            <option value="{{ $ranting->id }}" {{ old('ranting_id') == $ranting->id ? 'selected' : '' }}>
+                                {{ ucfirst($ranting->kelurahan) }}</option>
+                        @endforeach
+                        <option value="new">+ Tambah Ranting Baru</option>
+                    </select>
+                    <input type="text" name="new_ranting" id="new_ranting" placeholder="Masukkan Nama Ranting Baru"
+                        value="{{ old('new_ranting') }}"
+                        class="shadow appearance-none border mt-2 w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline hidden">
+                @endif
             </div>
 
             <div class="mb-6">

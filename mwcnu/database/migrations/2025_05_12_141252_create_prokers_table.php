@@ -13,13 +13,27 @@ return new class extends Migration
     {
         Schema::create('prokers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->string('program', length:100);
-            $table->enum('status',['pengajuan','di setujui','di tolak'])->default('pengajuan');
-            $table->string('catatan', length:100);
+
+            $table->unsignedBigInteger('anggota_id');
+            $table->string('judul', 100);
+
+            $table->unsignedBigInteger('bidang_id');
+            $table->unsignedBigInteger('jenis_id');
+            $table->unsignedBigInteger('tujuan_id');
+            $table->unsignedBigInteger('sasaran_id');
+
+            $table->string('proposal');
+            $table->text('keterangan')->nullable();
+
+            $table->enum('status', ['pengajuan', 'disetujui', 'ditolak'])->default('pengajuan');
+
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('anggota_id')->references('id')->on('anggotas')->onDelete('cascade');
+            $table->foreign('bidang_id')->references('id')->on('bidangs')->onDelete('cascade');
+            $table->foreign('jenis_id')->references('id')->on('jenis_kegiatans')->onDelete('cascade');
+            $table->foreign('tujuan_id')->references('id')->on('tujuans')->onDelete('cascade');
+            $table->foreign('sasaran_id')->references('id')->on('sasarans')->onDelete('cascade');
         });
     }
 

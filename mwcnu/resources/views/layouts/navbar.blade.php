@@ -24,8 +24,8 @@
                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
                     <i class="fas fa-user-circle mr-1"></i>
                     @auth
-    {{ auth()->user()->anggota->name ?? auth()->user()->name }}
-@endauth
+                        {{ auth()->user()->anggota->name ?? auth()->user()->name }}
+                    @endauth
                 </span>
             </a>
 

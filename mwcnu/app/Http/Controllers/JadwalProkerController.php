@@ -2,45 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Jadwal_proker;
+use App\Models\JadwalProker;
+use App\Models\JadwalProkerDetail;
 use App\Models\Proker;
 use Illuminate\Http\Request;
-use Exception;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class JadwalProkerController extends Controller
 {
-    public function show()
+    public function countUnassignedProker()
     {
-        $penjadwalan = Jadwal_proker::with('proker')->where('status', 'penjadwalan')->get();
-        $berjalan = Jadwal_proker::with('proker')->where('status', 'berjalan')->get();
-        $selesai = Jadwal_proker::with('proker')->where('status', 'selesai')->get();
+        $count = Proker::where('status', 'disetujui')
+            ->doesntHave('jadwalProker')
+            ->count();
 
-        return view('pages.dashboard', compact('penjadwalan', 'berjalan', 'selesai'));
+        return response()->json(['count' => $count]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $query = Jadwal_proker::with(['proker', 'penanggungJawab']);
+        $jadwals = JadwalProker::with(['proker', 'penanggungJawab', 'details'])
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->get();
 
-        if (request('status')) {
-            $query->where('status', request('status'));
-        }
+        $unassignedCount = Proker::where('status', 'disetujui')
+            ->doesntHave('jadwalProker')
+            ->count();
 
-        $query->orderBy('tanggal_mulai');
-        $jadwals = $query->get();
-
-        $belumDijadwalCount = Proker::where('status', 'di setujui')
-        ->doesntHave('jadwal')
-        ->count();
-
-        return view('pages.jadwal_proker.index', compact('jadwals', 'belumDijadwalCount'));
+        return view('pages.jadwal_proker.index', compact('jadwals', 'unassignedCount'));
     }
 
     public function create()
     {
-        $prokers = Proker::where('status', 'di setujui')
-            ->doesntHave('jadwal')
+        $prokers = Proker::where('status', 'disetujui')
+            ->doesntHave('jadwalProker')
             ->get();
 
         return view('pages.jadwal_proker.create', compact('prokers'));
@@ -48,72 +45,120 @@ class JadwalProkerController extends Controller
 
     public function store(Request $request)
     {
-        try {
-            $request->validate(
-                [
-                    'proker_id' => 'required|exists:prokers,id',
-                    'tanggal_mulai' => 'required|date',
-                    'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-                    'status' => 'required|in:penjadwalan,berjalan,selesai',
-                    'catatan' => 'nullable|string|max:100',
-                ],
-                [
-                    'proker_id.required' => 'Silahkan pilih program kerja',
-                    'tanggal_mulai.required' => 'Tanggal mulai harus diisi',
-                    'tanggal_selesai.required' => 'Tanggal selesai harus diisi',
-                    'status.required' => 'Status harus diisi',
-                    'catatan.required' => 'Catatan harus diisi',
-                ]
-            );
+        $request->validate([
+            'proker_id' => 'required|exists:prokers,id',
+            'status' => 'required|in:penjadwalan,berjalan,selesai',
+            'kegiatan' => 'required|array',
+            'kegiatan.*' => 'required|string',
+            'tanggal_mulai' => 'required|array',
+            'tanggal_mulai.*' => 'required|date',
+            'tanggal_selesai' => 'required|array',
+            'tanggal_selesai.*' => 'required|date|after_or_equal:tanggal_mulai.*',
+            'catatan' => 'nullable|array'
+        ]);
 
+        DB::transaction(function () use ($request) {
             $proker = Proker::findOrFail($request->proker_id);
-
-            Jadwal_proker::create([
-                'proker_id' => $proker->id,
-                'penanggung_jawab_id' => $proker->user_id,
-                'tanggal_mulai' => $request->tanggal_mulai,
-                'tanggal_selesai' => $request->tanggal_selesai,
+            $jadwal = JadwalProker::create([
+                'proker_id' => $request->proker_id,
+                'penanggung_jawab_id' => $proker->anggota_id,
                 'status' => $request->status,
-                'catatan' => $request->catatan,
             ]);
-            return redirect('jadwal/create')->with('success', 'Jadwal program kerja berhasil dibuat');
-        } catch (Exception $e) {
-            return redirect('jadwal/create')->withErrors(['error' => $e->getMessage()]);
-        }
+
+            foreach ($request->kegiatan as $i => $keg) {
+                JadwalProkerDetail::create([
+                    'jadwal_proker_id' => $jadwal->id,
+                    'kegiatan' => $keg,
+                    'tanggal_mulai' => $request->tanggal_mulai[$i],
+                    'tanggal_selesai' => $request->tanggal_selesai[$i],
+                    'catatan' => $request->catatan[$i] ?? null,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Jadwal proker berhasil dibuat.');
     }
 
     public function edit($id)
     {
-        $jadwal = Jadwal_proker::findOrFail($id);
-        $prokers = Proker::all();
+        $jadwal = JadwalProker::with(['details', 'proker'])->findOrFail($id);
+        $prokers = Proker::whereDoesntHave('jadwalProker')
+            ->orWhere('id', $jadwal->proker_id)
+            ->get();
+
         return view('pages.jadwal_proker.edit', compact('jadwal', 'prokers'));
     }
 
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'status' => 'required|in:penjadwalan,berjalan,selesai',
-            'catatan' => 'nullable|string|max:100',
-        ]);
+{
+    $request->validate([
+        'proker_id' => 'required|exists:prokers,id',
+        'status' => 'required|in:penjadwalan,berjalan,selesai',
 
-        $jadwal = Jadwal_proker::findOrFail($id);
+        'kegiatan' => 'required|array|min:1',
+        'kegiatan.*' => 'required|string|max:255',
+
+        'tanggal_mulai' => 'required|array|min:1',
+        'tanggal_mulai.*' => 'required|date',
+
+        'tanggal_selesai' => 'required|array|min:1',
+        'tanggal_selesai.*' => 'required|date',
+
+        'catatan' => 'nullable|array',
+        'catatan.*' => 'nullable|string',
+    ]);
+
+    DB::transaction(function () use ($request, $id) {
+        $jadwal = JadwalProker::findOrFail($id);
+        $proker = Proker::findOrFail($request->proker_id);
+
+        // Update header
         $jadwal->update([
-            'tanggal_mulai' => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
+            'proker_id' => $request->proker_id,
+            'penanggung_jawab_id' => $proker->anggota_id,
             'status' => $request->status,
-            'catatan' => $request->catatan,
         ]);
 
-        return redirect("jadwal/{$id}")->with('success', 'Jadwal berhasil diperbarui.');
-    }
+        // Hapus semua detail lama
+        $jadwal->details()->delete();
+
+        // Tambah detail baru
+        foreach ($request->kegiatan as $i => $keg) {
+            JadwalProkerDetail::create([
+                'jadwal_proker_id' => $jadwal->id,
+                'kegiatan' => $keg,
+                'tanggal_mulai' => $request->tanggal_mulai[$i],
+                'tanggal_selesai' => $request->tanggal_selesai[$i],
+                'catatan' => $request->catatan[$i] ?? null,
+            ]);
+        }
+    });
+
+    return redirect()->route('jadwal-proker.index')->with('success', 'Jadwal berhasil diperbarui.');
+}
+
 
     public function destroy($id)
     {
-        $jadwal = Jadwal_proker::findOrFail($id);
+        $jadwal = JadwalProker::findOrFail($id);
         $jadwal->delete();
+        return back()->with('success', 'Jadwal berhasil dihapus.');
+    }
 
-        return redirect('/jadwal')->with('success', 'Jadwal berhasil dihapus.');
+    public function semuaJadwal()
+    {
+        $penjadwalan = JadwalProkerDetail::whereHas('jadwalProker', function ($q) {
+            $q->where('status', 'penjadwalan');
+        })->with('jadwalProker.proker')->get();
+
+        $berjalan = JadwalProkerDetail::whereHas('jadwalProker', function ($q) {
+            $q->where('status', 'berjalan');
+        })->with('jadwalProker.proker')->get();
+
+        $selesai = JadwalProkerDetail::whereHas('jadwalProker', function ($q) {
+            $q->where('status', 'selesai');
+        })->with('jadwalProker.proker')->get();
+
+        return view('pages.dashboard', compact('penjadwalan', 'berjalan', 'selesai'));
     }
 }

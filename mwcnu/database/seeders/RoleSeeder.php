@@ -25,7 +25,7 @@ class RoleSeeder extends Seeder
 
         Role::create([
             'id' => '3',
-            'jabatan' => 'PRNU'
+            'jabatan' => 'Tanfidiyah ranting'
         ]);
 
         Role::create([

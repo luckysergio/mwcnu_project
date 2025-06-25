@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bidang;
+use App\Models\JenisKegiatan;
 use App\Models\Proker;
+use App\Models\Sasaran;
+use App\Models\Tujuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProkerController extends Controller
 {
     public function proker_request()
     {
-        $prokers = Proker::where('status', 'pengajuan')->get();
+        $prokers = Proker::with(['anggota.user', 'bidang', 'jenis', 'tujuan', 'sasaran'])
+            ->where('status', 'pengajuan')
+            ->latest()
+            ->get();
 
-        return view('pages.programkerja.request', [
-            'prokers' => $prokers,
-        ]);
+        return view('pages.programkerja.request', compact('prokers'));
     }
 
     public function proker_approval(Request $request, $prokerId)
@@ -25,12 +31,12 @@ class ProkerController extends Controller
 
         $proker = Proker::findOrFail($prokerId);
 
-        $proker->status = $request->for === 'approve' ? 'di setujui' : 'di tolak';
+        $proker->status = $request->for === 'approve' ? 'disetujui' : 'ditolak';
         $proker->save();
 
         $message = $request->for === 'approve'
-            ? 'Program kerja berhasil disetujui'
-            : 'Program kerja ditolak';
+            ? 'Program kerja berhasil disetujui.'
+            : 'Program kerja berhasil ditolak.';
 
         return back()->with('success', $message);
     }
@@ -50,75 +56,110 @@ class ProkerController extends Controller
         return response()->json(['count' => $count]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $query = Proker::query();
+        $query = Proker::with(['anggota.user', 'bidang', 'jenis', 'tujuan', 'sasaran']);
 
-        if (request('status')) {
-            $query->where('status', request('status'));
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
         }
 
-        $prokers = $query->orderBy('created_at', 'desc')->paginate(10);
+        $prokers = $query->latest()->get();
 
         return view('pages.programkerja.index', compact('prokers'));
     }
 
     public function create()
     {
-        return view('pages.programkerja.create');
+        return view('pages.programkerja.create', [
+            'bidangs' => Bidang::all(),
+            'jenisKegiatans' => JenisKegiatan::all(),
+            'tujuans' => Tujuan::all(),
+            'sasarans' => Sasaran::all(),
+        ]);
     }
 
     public function store(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'program' => 'required|string|max:100',
-                'catatan' => 'required|string|max:100',
-            ], [
-                'program.required' => 'Program kerja harus diisi',
-                'catatan.required' => 'Berikan alasan kenapa mengajukan program ini',
-            ]);
-
-            $proker = Proker::create([
-                'user_id' => Auth::id(),
-                'program' => $validated['program'],
-                'catatan' => $validated['catatan'],
-            ]);
-
-            return redirect('proker/create')->with('success', 'Program kerja berhasil diajukan');
-        } catch (\Exception $e) {
-            return redirect('proker/create')->withErrors(['error'=> 'Terjadi kesalahan: ' . $e->getMessage()]);
-        }
-    }
-
-    public function edit($id)
-    {
-        $proker = Proker::findOrFail($id);
-        return view('pages.programkerja.edit', compact('proker'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $proker = Proker::findOrFail($id);
-
-        $validated = $request->validate([
-            'program' => 'required|string|max:100',
-            'catatan' => 'required|string|max:100',
+        $request->validate([
+            'judul' => 'required|string|max:100',
+            'bidang_id' => 'required|exists:bidangs,id',
+            'jenis_id' => 'required|exists:jenis_kegiatans,id',
+            'tujuan_id' => 'required|exists:tujuans,id',
+            'sasaran_id' => 'required|exists:sasarans,id',
+            'proposal' => 'required|mimes:pdf|max:2048',
+            'keterangan' => 'nullable|string'
         ]);
+
+        $file = $request->file('proposal')->store('proposals', 'public');
+
+        Proker::create([
+            'anggota_id' => Auth::user()->anggota->id,
+            'judul' => $request->judul,
+            'bidang_id' => $request->bidang_id,
+            'jenis_id' => $request->jenis_id,
+            'tujuan_id' => $request->tujuan_id,
+            'sasaran_id' => $request->sasaran_id,
+            'proposal' => $file,
+            'keterangan' => $request->keterangan,
+        ]);
+
+        return back()->with('success', 'Program kerja berhasil diajukan.');
+    }
+
+    public function edit(Proker $proker)
+    {
+        return view('pages.programkerja.edit', [
+            'proker' => $proker,
+            'bidangs' => Bidang::all(),
+            'jenisKegiatans' => JenisKegiatan::all(),
+            'tujuans' => Tujuan::all(),
+            'sasarans' => Sasaran::all(),
+        ]);
+    }
+
+    public function update(Request $request, Proker $proker)
+    {
+        $request->validate([
+            'judul' => 'required|string|max:100',
+            'bidang_id' => 'required|exists:bidangs,id',
+            'jenis_id' => 'required|exists:jenis_kegiatans,id',
+            'tujuan_id' => 'required|exists:tujuans,id',
+            'sasaran_id' => 'required|exists:sasarans,id',
+            'proposal' => 'nullable|mimes:pdf|max:2048',
+            'keterangan' => 'nullable|string',
+            'status' => 'required|in:pengajuan,disetujui,ditolak',
+        ]);
+
+        if ($request->hasFile('proposal')) {
+            if ($proker->proposal && Storage::exists($proker->proposal)) {
+                Storage::delete($proker->proposal);
+            }
+            $file = $request->file('proposal')->store('proposals');
+            $proker->proposal = $file;
+        }
 
         $proker->update([
-            'program' => $validated['program'],
-            'catatan' => $validated['catatan'],
+            'judul' => $request->judul,
+            'bidang_id' => $request->bidang_id,
+            'jenis_id' => $request->jenis_id,
+            'tujuan_id' => $request->tujuan_id,
+            'sasaran_id' => $request->sasaran_id,
+            'keterangan' => $request->keterangan,
+            'status' => $request->status,
+            'proposal' => $proker->proposal,
         ]);
 
-        return redirect("/proker/{$id}")->with('success', 'Program kerja berhasil diperbarui.');
+        return back()->with('success', 'Data program kerja berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(Proker $proker)
     {
-        $prokers = Proker::findOrFail($id);
-        $prokers->delete();
+        if ($proker->proposal && Storage::exists($proker->proposal)) {
+            Storage::delete($proker->proposal);
+        }
 
-        return redirect('/proker')->with('success', 'Data program kerja berhasil dihapus');
+        $proker->delete();
+        return back()->with('success', 'Data program kerja berhasil dihapus.');
     }
 }

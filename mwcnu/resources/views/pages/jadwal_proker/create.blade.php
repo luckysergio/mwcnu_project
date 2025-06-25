@@ -1,102 +1,120 @@
 @extends('layouts.app')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet" />
 
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="bg-white p-6 rounded-2xl shadow-md space-y-6">
 
-
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <form action="/jadwal" method="POST" class="needs-validation" novalidate>
-                @csrf
-
-                <div class="card shadow">
-                    <div class="card-body">
-
-
-                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
-
-                        @if(session('success'))
-                            <script>
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: @json(session('success')),
-                                    didClose: () => {
-                                        window.location.href = "/jadwal";
-                                    }
-                                });
-                            </script>
-                        @endif
-
-                        @if($errors->any())
-                            <script>
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal!',
-                                    html: `{!! implode('<br>', $errors->all()) !!}`
-                                });
-                            </script>
-                        @endif
-
-                        <div class="mb-3">
-                            <label for="proker_id" class="form-label">Program kerja</label>
-                            <select name="proker_id" id="proker_id" class="form-control @error('proker_id') is-invalid @enderror">
-                                <option disabled selected>Pilih Program Kerja</option>
-                                @foreach($prokers as $proker)
-                                    <option value="{{ $proker->id }}">{{ $proker->program }}</option>
-                                @endforeach
-                            </select>
-                            @error('proker_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    
-                        <div class="mb-3">
-                            <label for="tanggal_mulai" class="form-label">Tanggal mulai</label>
-                            <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control @error('tanggal_mulai') is-invalid @enderror">
-                            @error('tanggal_mulai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    
-                        <div class="mb-3">
-                            <label for="tanggal_selesai" class="form-label">Tanggal selesai</label>
-                            <input type="date" name="tanggal_selesai" id="tanggal_selesai" class="form-control @error('tanggal_selesai') is-invalid @enderror">
-                            @error('tanggal_selesai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    
-                        <div class="mb-3">
-                            <label for="catatan" class="form-label">Catatan</label>
-                            <textarea name="catatan" id="catatan" class="form-control @error('catatan') is-invalid @enderror" rows="3"></textarea>
-                            @error('catatan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
-                                <option disabled selected>Pilih Status</option>
-                                <option value="penjadwalan">Penjadwalan</option>
-                                <option value="berjalan">Berjalan</option>
-                                <option value="selesai">Selesai</option>
-                            </select>
-                            @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                    </div>
-
-                    <div class="card-footer bg-white d-flex justify-content-end">
-                        <button type="submit" class="btn btn-success">Simpan</button>
-                    </div>
-                </div>
-            </form>
+        <div class="text-center">
+            <h1 class="text-2xl font-bold text-gray-800">Buat Jadwal Program Kerja</h1>
+            <p class="text-gray-500 text-sm">Isi jadwal berdasarkan program kerja yang telah disetujui</p>
         </div>
-    </div>
 
+        @if (session('success'))
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: @json(session('success')),
+                    didClose: () => {
+                        window.location.href = "{{ route('jadwal-proker.index') }}";
+                    }
+                });
+            </script>
+        @endif
+
+        @if ($errors->any())
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    html: `{!! implode('<br>', $errors->all()) !!}`
+                });
+            </script>
+        @endif
+
+        <form action="{{ route('jadwal-proker.store') }}" method="POST" class="space-y-5">
+            @csrf
+
+            <div>
+                <label for="proker_id" class="block text-sm font-medium text-gray-700 mb-1">Pilih Program Kerja</label>
+                <select name="proker_id" id="proker_id"
+                    class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500">
+                    <option value="">-- Pilih Program Kerja --</option>
+                    @foreach ($prokers as $proker)
+                        <option value="{{ $proker->id }}">{{ $proker->judul }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status Jadwal</label>
+                <select name="status" id="status"
+                    class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500">
+                    <option value="penjadwalan">Penjadwalan</option>
+                    <option value="berjalan">Berjalan</option>
+                    <option value="selesai">Selesai</option>
+                </select>
+            </div>
+
+            <hr class="my-4">
+
+            <div id="detailContainer">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Detail Jadwal</h3>
+
+                <div class="detail-group space-y-3 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="kegiatan[]" placeholder="Kegiatan"
+                            class="w-full px-4 py-2 border rounded-lg shadow-sm" required>
+
+                        <input type="text" name="catatan[]" placeholder="Catatan (opsional)"
+                            class="w-full px-4 py-2 border rounded-lg shadow-sm">
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                        <input type="date" name="tanggal_mulai[]" class="w-full px-4 py-2 border rounded-lg shadow-sm" required>
+                        <input type="date" name="tanggal_selesai[]" class="w-full px-4 py-2 border rounded-lg shadow-sm" required>
+                    </div>
+                    <hr class="my-2">
+                </div>
+            </div>
+
+            <button type="button" onclick="addDetail()"
+                class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg">
+                + Tambah Kegiatan
+            </button>
+
+            <div class="flex justify-center">
+                <button type="submit"
+                    class="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold rounded-lg shadow hover:from-green-600 hover:to-green-700 focus:ring-2 focus:ring-green-300">
+                    <i class="fas fa-save text-sm"></i> Simpan Jadwal
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function addDetail() {
+        const container = document.getElementById('detailContainer');
+        const detail = document.createElement('div');
+        detail.classList.add('detail-group', 'space-y-3', 'mb-6');
+        detail.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" name="kegiatan[]" placeholder="Kegiatan"
+                    class="w-full px-4 py-2 border rounded-lg shadow-sm" required>
+
+                <input type="text" name="catatan[]" placeholder="Catatan (opsional)"
+                    class="w-full px-4 py-2 border rounded-lg shadow-sm">
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                <input type="date" name="tanggal_mulai[]" class="w-full px-4 py-2 border rounded-lg shadow-sm" required>
+                <input type="date" name="tanggal_selesai[]" class="w-full px-4 py-2 border rounded-lg shadow-sm" required>
+            </div>
+            <hr class="my-2">
+        `;
+        container.appendChild(detail);
+    }
+</script>
 @endsection
