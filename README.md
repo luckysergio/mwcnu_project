@@ -24,7 +24,7 @@ Dashboard untuk admin MWCNU yang memiliki akses penuh terhadap seluruh data dan 
   - Proker (Program Kerja)
 - Monitoring laporan dan dokumentasi kegiatan
 
-![Home Admin](tampilan/home-admin.png)
+![Home Admin](tampilan/admin.png)
 
 ---
 
@@ -38,7 +38,7 @@ Halaman utama untuk pengurus ranting NU (tanfidiyah).
 - Upload dokumentasi & laporan kegiatan
 - Riwayat kegiatan ranting
 
-![Home Tanfidiyah Ranting](tampilan/home-tanfidiyah-ranting.png)
+![Home Tanfidiyah Ranting](tampilan/tanfidiyah-ranting.png)
 
 ---
 
@@ -51,7 +51,7 @@ Tampilan untuk anggota umum dengan akses terbatas.
 - Akses dokumentasi publik kegiatan
 - Melihat profil & histori aktivitas pribadi
 
-![Home Anggota](tampilan/home-anggota.png)
+![Home Anggota](tampilan/anggota.png)
 
 ---
 
