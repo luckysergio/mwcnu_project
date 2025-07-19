@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AnggaranController;
 use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DataProkerController;
