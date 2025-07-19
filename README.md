@@ -8,7 +8,7 @@ Aplikasi web untuk memonitor program kerja organisasi **Majelis Wakil Cabang Nah
 
 Form login digunakan oleh semua pengguna sistem: admin, tanfidiyah ranting, dan anggota biasa.
 
-![Login](public/tampilan/login.png)
+![Login](tampilan/login.png)
 
 ---
 
@@ -17,7 +17,6 @@ Form login digunakan oleh semua pengguna sistem: admin, tanfidiyah ranting, dan 
 Dashboard untuk admin MWCNU yang memiliki akses penuh terhadap seluruh data dan fitur sistem.
 
 **Fitur:**
-- Statistik jumlah anggota dan program kerja
 - Manajemen data:
   - Anggota NU
   - Bidang, Jenis Kegiatan, Tujuan, Sasaran
@@ -25,7 +24,7 @@ Dashboard untuk admin MWCNU yang memiliki akses penuh terhadap seluruh data dan 
   - Proker (Program Kerja)
 - Monitoring laporan dan dokumentasi kegiatan
 
-![Home Admin](public/tampilan/home admin.png)
+![Home Admin](tampilan/home-admin.png)
 
 ---
 
@@ -39,7 +38,7 @@ Halaman utama untuk pengurus ranting NU (tanfidiyah).
 - Upload dokumentasi & laporan kegiatan
 - Riwayat kegiatan ranting
 
-![Home Tanfidiyah Ranting](public/tampilan/home tanfidiyah ranting.png)
+![Home Tanfidiyah Ranting](tampilan/home-tanfidiyah-ranting.png)
 
 ---
 
@@ -52,7 +51,7 @@ Tampilan untuk anggota umum dengan akses terbatas.
 - Akses dokumentasi publik kegiatan
 - Melihat profil & histori aktivitas pribadi
 
-![Home Anggota](public/tampilan/home anggota.png)
+![Home Anggota](tampilan/home-anggota.png)
 
 ---
 
@@ -63,4 +62,3 @@ Tampilan untuk anggota umum dengan akses terbatas.
 - Bootstrap (SB Admin)
 - MySQL
 - SweetAlert2
-
