@@ -8,7 +8,7 @@ Aplikasi web untuk memonitor program kerja organisasi **Majelis Wakil Cabang Nah
 
 Form login digunakan oleh semua pengguna sistem: admin, tanfidiyah ranting, dan anggota biasa.
 
-![Login](mwcnu_project/tampilan/login.png)
+![Login](tampilan/login.png)
 
 ---
 
