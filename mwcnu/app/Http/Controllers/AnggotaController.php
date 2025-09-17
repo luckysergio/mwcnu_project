@@ -48,7 +48,7 @@ class AnggotaController extends Controller
                 'name' => 'required|string|max:100',
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|string|min:6',
-                'phone' => 'required|string|min:10|max:15',
+                'phone' => 'required|regex:/^[0-9]+$/|min:10|max:15',
                 'role_id' => 'required',
                 'ranting_id' => 'required',
                 'status' => 'required|in:active,inactive',
@@ -60,7 +60,7 @@ class AnggotaController extends Controller
                 if (!$request->new_role) {
                     return back()->withErrors(['new_role' => 'Nama role baru harus diisi']);
                 }
-                $role = Role::create(['jabatan' => $request->new_role]); // ✅ FIX
+                $role = Role::create(['jabatan' => $request->new_role]);
                 $role_id = $role->id;
             } else {
                 $role_id = $request->role_id;
@@ -70,7 +70,7 @@ class AnggotaController extends Controller
                 if (!$request->new_ranting) {
                     return back()->withErrors(['new_ranting' => 'Nama ranting baru harus diisi']);
                 }
-                $ranting = Ranting::create(['kelurahan' => $request->new_ranting]); // ✅ FIX
+                $ranting = Ranting::create(['kelurahan' => $request->new_ranting]);
                 $ranting_id = $ranting->id;
             } else {
                 $ranting_id = $request->ranting_id;
@@ -111,7 +111,7 @@ class AnggotaController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'phone' => 'required|string|min:10|max:15',
+            'phone' => 'required|regex:/^[0-9]+$/|min:10|max:15',
             'status' => 'required|in:active,inactive',
             'role_id' => 'required',
             'ranting_id' => 'required',

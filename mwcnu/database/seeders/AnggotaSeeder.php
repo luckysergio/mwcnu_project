@@ -11,7 +11,6 @@ class AnggotaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Buat user
         $user = User::create([
             'email' => 'admin@mwcnu.com',
             'password' => Hash::make('12341234'),

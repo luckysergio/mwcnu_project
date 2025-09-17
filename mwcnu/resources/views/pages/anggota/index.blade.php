@@ -22,7 +22,6 @@
         </div>
     @endif
 
-    {{-- Alerts --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
     @if (session('success'))
         <script>
@@ -43,7 +42,6 @@
         </script>
     @endif
 
-    {{-- Filter Ranting --}}
     <form method="GET" class="flex justify-center mb-8">
         <select name="ranting" onchange="this.form.submit()"
             class="w-full max-w-xs px-4 py-3 border rounded-full shadow-md focus:ring-green-400">
@@ -56,7 +54,6 @@
         </select>
     </form>
 
-    {{-- Table --}}
     <div class="bg-white shadow-md rounded-xl overflow-hidden mb-10">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm text-left">
@@ -96,7 +93,11 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                @if ($canEditDelete)
+                                @php
+                                    $isProtected = $item->user?->email === 'admin@mwcnu.com';
+                                @endphp
+
+                                @if ($canEditDelete && !$isProtected)
                                     <div class="flex justify-center gap-2">
                                         <a href="/anggota/{{ $item->id }}"
                                             class="inline-flex items-center justify-center w-9 h-9 text-white shadow transition"

@@ -26,29 +26,37 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @foreach ($data as $i => $item)
+                            @php
+                                $lockedNames = $type === 'jabatan'
+                                    ? ['Admin', 'Tanfidiyah', 'Tanfidiyah ranting', 'Sekretaris']
+                                    : ['karang tengah', 'karang mulya', 'karang timur', 'pedurenan', 'pondok bahar', 'pondok pucung', 'parung jaya'];
+                                $nama = $type === 'jabatan' ? $item->jabatan : $item->kelurahan;
+                            @endphp
                             <tr>
                                 <td class="px-4 py-2 text-center">{{ $i + 1 }}</td>
-                                <td class="px-4 py-2 text-center">
-                                    {{ $type == 'jabatan' ? $item->jabatan : $item->kelurahan }}
-                                </td>
+                                <td class="px-4 py-2 text-center">{{ $nama }}</td>
                                 <td class="px-4 py-2 text-center space-x-2">
-                                    <button
-                                        onclick="openEditModal('{{ $type }}', {{ $item->id }}, '{{ $type == 'jabatan' ? $item->jabatan : $item->kelurahan }}')"
-                                        aria-label="Edit"
-                                        class="inline-flex items-center justify-center w-9 h-9 text-white shadow transition"
-                                        style="background-color: #facc15; border-radius: 9999px;">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                    @if (!in_array(strtolower($nama), array_map('strtolower', $lockedNames)))
+                                        <button
+                                            onclick="openEditModal('{{ $type }}', {{ $item->id }}, '{{ $nama }}')"
+                                            aria-label="Edit"
+                                            class="inline-flex items-center justify-center w-9 h-9 text-white shadow transition"
+                                            style="background-color: #facc15; border-radius: 9999px;">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
 
-                                    <button type="button"
-                                        onclick="confirmDelete('{{ route('jdr.destroy', [$type, $item->id]) }}', '{{ $type == 'jabatan' ? $item->jabatan : $item->kelurahan }}')"
-                                        aria-label="Delete"
-                                        class="inline-flex items-center justify-center w-9 h-9 text-white shadow transition"
-                                        style="background-color: #dc2626; border-radius: 9999px;"
-                                        onmouseover="this.style.backgroundColor='#b91c1c'"
-                                        onmouseout="this.style.backgroundColor='#dc2626'">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                        <button type="button"
+                                            onclick="confirmDelete('{{ route('jdr.destroy', [$type, $item->id]) }}', '{{ $nama }}')"
+                                            aria-label="Delete"
+                                            class="inline-flex items-center justify-center w-9 h-9 text-white shadow transition"
+                                            style="background-color: #dc2626; border-radius: 9999px;"
+                                            onmouseover="this.style.backgroundColor='#b91c1c'"
+                                            onmouseout="this.style.backgroundColor='#dc2626'">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    @else
+                                        <span class="text-gray-400 italic">Terkunci</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
