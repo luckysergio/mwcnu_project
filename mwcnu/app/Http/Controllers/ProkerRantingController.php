@@ -18,13 +18,11 @@ class ProkerRantingController extends Controller
             return back()->withErrors('Akun ini belum terhubung dengan data anggota.');
         }
 
-        // Status anggota: MWC atau Ranting
         $anggotaStatus = $user->anggota->status->status ?? null;
 
-        // Ranting user
         $rantingId = $user->anggota->ranting_id;
 
-        
+
         if ($anggotaStatus === 'MWC') {
 
             $listRanting = Ranting::all();
@@ -36,10 +34,8 @@ class ProkerRantingController extends Controller
                 $penjadwalan = $this->getProkerByStatus($selectedRanting, 'penjadwalan');
                 $berjalan    = $this->getProkerByStatus($selectedRanting, 'berjalan');
                 $selesai     = $this->getProkerByStatus($selectedRanting, 'selesai');
-
             } else {
 
-                // Jika belum memilih ranting → tampilkan semua program kerja
                 $penjadwalan = JadwalProkerDetail::whereHas('jadwalProker', function ($q) {
                     $q->where('status', 'penjadwalan');
                 })->get();
@@ -62,9 +58,7 @@ class ProkerRantingController extends Controller
             ));
         }
 
-        // =====================================================
-        // JIKA USER RANTING BIASA
-        // =====================================================
+        
         $penjadwalan = $this->getProkerByStatus($rantingId, 'penjadwalan');
         $berjalan    = $this->getProkerByStatus($rantingId, 'berjalan');
         $selesai     = $this->getProkerByStatus($rantingId, 'selesai');
@@ -75,23 +69,39 @@ class ProkerRantingController extends Controller
             'selesai'
         ));
     }
-
-
-    /**
-     * Ambil program kerja berdasarkan ranting dan status
-     */
     private function getProkerByStatus($rantingId, $status)
     {
         return JadwalProkerDetail::whereHas('jadwalProker', function ($q) use ($rantingId, $status) {
 
-            // Status ada di tabel jadwal_prokers
             $q->where('status', $status)
 
-                // Filter proker yang sesuai ranting
                 ->whereHas('proker', function ($sub) use ($rantingId) {
                     $sub->where('ranting_id', $rantingId);
                 });
-
         })->get();
+    }
+
+    public function uploadFoto(Request $request, $id)
+    {
+        $request->validate([
+            'foto.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // max 5MB per foto
+        ]);
+
+        $prokerDetail = JadwalProkerDetail::findOrFail($id);
+
+        $uploadedFiles = [];
+
+        if ($request->hasFile('foto')) {
+            foreach ($request->file('foto') as $file) {
+                $path = $file->store('proker', 'public'); // simpan di storage/app/public/proker
+                $uploadedFiles[] = $path;
+            }
+
+            $existingFotos = $prokerDetail->foto ? json_decode($prokerDetail->foto, true) : [];
+            $prokerDetail->foto = json_encode(array_merge($existingFotos, $uploadedFiles));
+            $prokerDetail->save();
+        }
+
+        return back()->with('success', 'Foto berhasil diupload.');
     }
 }

@@ -78,18 +78,17 @@ Route::middleware(['auth', 'role:Admin,Tanfidiyah,Tanfidiyah ranting,Sekretaris'
     });
 
     Route::middleware(['auth'])
-        ->prefix('proker-ranting')
-        ->name('proker-ranting.')
-        ->group(function () {
+    ->prefix('proker-ranting')
+    ->name('proker-ranting.')
+    ->group(function () {
 
-            Route::get('/', [ProkerRantingController::class, 'index'])->name('index');
+        Route::get('/', [ProkerRantingController::class, 'index'])->name('index');
+        Route::get('/{id}', [ProkerRantingController::class, 'show'])->name('show');
+        Route::post('/{id}/update-status', [ProkerRantingController::class, 'updateStatus'])
+            ->name('update-status');
 
-            Route::get('/{id}', [ProkerRantingController::class, 'show'])->name('show');
+        Route::post('/{id}/upload-foto', [ProkerRantingController::class, 'uploadFoto'])
+            ->name('upload-foto');
+    });
 
-            Route::post('/{id}/update-status', [ProkerRantingController::class, 'updateStatus'])
-                ->name('update-status');
-
-            Route::post('/{id}/upload-foto', [ProkerRantingController::class, 'uploadFoto'])
-                ->name('upload-foto');
-        });
 });
