@@ -20,9 +20,8 @@ class AnggotaSeeder extends Seeder
             'name' => 'Admin IT',
             'user_id' => $user->id,
             'role_id' => 1,
-            'ranting_id' => 1,
             'phone' => '081234567890',
-            'status' => 'active',
+            'status_id' => 1,
         ]);
     }
 }

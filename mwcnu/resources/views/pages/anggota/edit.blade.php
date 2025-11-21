@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
 
     <div class="max-w-3xl mx-auto mt-10">
         <form action="{{ route('anggota.update', $anggota->id) }}" method="POST"
-            class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4">
+            class="bg-white shadow-xl border rounded-2xl px-8 pt-6 pb-10 mb-8">
             @csrf
             @method('PUT')
 
@@ -31,22 +32,37 @@
                 </script>
             @endif
 
+
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Nama Lengkap</label>
+                <label class="block text-sm font-semibold mb-2 text-gray-700">Nama Lengkap</label>
                 <input type="text" name="name" value="{{ old('name', $anggota->name) }}"
-                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('name')  @else border-gray-300 @enderror">
+                    class="w-full border rounded-xl py-2.5 px-4 text-gray-700 focus:outline-none focus:ring focus:ring-green-300">
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Nomor Handphone</label>
+                <label class="block text-sm font-semibold mb-2 text-gray-700">Nomor Handphone</label>
                 <input type="text" name="phone" value="{{ old('phone', $anggota->phone) }}"
-                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('phone')  @else border-gray-300 @enderror">
+                    class="w-full border rounded-xl py-2.5 px-4 text-gray-700 focus:outline-none focus:ring focus:ring-green-300">
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Jabatan (Role)</label>
+                <label class="block text-sm font-semibold mb-2 text-gray-700">Status Anggota</label>
+                <select name="status_id" id="status_id"
+                    class="w-full border rounded-xl py-2.5 px-4 text-gray-700 focus:outline-none focus:ring focus:ring-green-300">
+                    <option disabled value="">Pilih Status</option>
+                    @foreach ($statuses as $status)
+                        <option value="{{ $status->id }}"
+                            {{ old('status_id', $anggota->status_id) == $status->id ? 'selected' : '' }}>
+                            {{ ucfirst($status->status) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2 text-gray-700">Jabatan (Role)</label>
                 <select name="role_id"
-                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('role_id')  @else border-gray-300 @enderror">
+                    class="w-full border rounded-xl py-2.5 px-4 text-gray-700 focus:outline-none focus:ring focus:ring-green-300">
                     <option disabled value="">Pilih Jabatan</option>
                     @foreach ($roles as $role)
                         <option value="{{ $role->id }}"
@@ -59,106 +75,114 @@
 
             @php
                 $user = auth()->user();
-                $role = $user->anggota?->role?->jabatan;
-                $isRestricted = in_array($role, ['Tanfidiyah ranting', 'Sekretaris']);
-                $userRantingId = $user->anggota?->ranting_id;
+                $myRole = $user->anggota?->role?->jabatan;
+                $isRestricted = in_array($myRole, ['Tanfidiyah ranting', 'Sekretaris']);
+                $userRanting = $user->anggota?->ranting_id;
             @endphp
 
-            <div class="mb-4">
-                <label for="ranting_id" class="block text-gray-700 text-sm font-bold mb-2">Ranting</label>
+            <div class="mb-4" id="ranting_section">
+                <label class="block text-sm font-semibold mb-2 text-gray-700">Ranting</label>
 
                 @if ($isRestricted)
-                    <select name="ranting_id" id="ranting_id" disabled
-                        class="shadow appearance-none border w-full py-2 px-3 bg-gray-100 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <select disabled class="w-full border bg-gray-100 rounded-xl py-2.5 px-4 text-gray-700">
                         @foreach ($rantings as $ranting)
-                            @if ($ranting->id == $userRantingId)
-                                <option value="{{ $ranting->id }}" selected>{{ ucfirst($ranting->kelurahan) }}</option>
+                            @if ($ranting->id == $userRanting)
+                                <option selected>{{ ucfirst($ranting->kelurahan) }}</option>
                             @endif
                         @endforeach
                     </select>
-                    <input type="hidden" name="ranting_id" value="{{ $userRantingId }}">
+                    <input type="hidden" name="ranting_id" value="{{ $userRanting }}">
                 @else
                     <select name="ranting_id" id="ranting_id"
-                        class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('ranting_id') border-red-500 @else @enderror">
-                        <option disabled selected>Pilih Ranting</option>
+                        class="w-full border rounded-xl py-2.5 px-4 text-gray-700 focus:outline-none focus:ring focus:ring-green-300">
+                        <option disabled value="">Pilih Ranting</option>
+
                         @foreach ($rantings as $ranting)
-                            <option value="{{ $ranting->id }}" {{ old('ranting_id') == $ranting->id ? 'selected' : '' }}>
-                                {{ ucfirst($ranting->kelurahan) }}</option>
+                            <option value="{{ $ranting->id }}"
+                                {{ old('ranting_id', $anggota->ranting_id) == $ranting->id ? 'selected' : '' }}>
+                                {{ ucfirst($ranting->kelurahan) }}
+                            </option>
                         @endforeach
+
                         <option value="new">+ Tambah Ranting Baru</option>
                     </select>
+
                     <input type="text" name="new_ranting" id="new_ranting" placeholder="Masukkan Nama Ranting Baru"
                         value="{{ old('new_ranting') }}"
-                        class="shadow appearance-none border mt-2 w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline hidden">
+                        class="w-full border rounded-xl py-2.5 px-4 mt-2 text-gray-700 focus:outline-none focus:ring focus:ring-green-300 hidden">
                 @endif
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
-                <select name="status"
-                    class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('status')  @else border-gray-300 @enderror">
-                    <option disabled value="">Pilih Status</option>
-                    <option value="active" {{ old('status', $anggota->status) == 'active' ? 'selected' : '' }}>Active
-                    </option>
-                    <option value="inactive" {{ old('status', $anggota->status) == 'inactive' ? 'selected' : '' }}>Inactive
-                    </option>
-                </select>
             </div>
 
             @if ($anggota->user)
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    <label class="block text-sm font-semibold mb-2 text-gray-700">Email</label>
                     <input type="email" name="user_email" value="{{ old('user_email', $anggota->user->email) }}"
-                        class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        class="w-full border rounded-xl py-2.5 px-4 text-gray-700 focus:outline-none focus:ring focus:ring-green-300">
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Password (kosongkan jika tidak diubah)</label>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2 text-gray-700">
+                        Password (kosongkan jika tidak diubah)
+                    </label>
                     <div class="relative">
                         <input type="password" name="user_password" id="user_password"
-                            class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <button type="button" id="togglePassword" class="absolute right-3 top-2.5 text-gray-500">
+                            class="w-full border rounded-xl py-2.5 px-4 text-gray-700 focus:outline-none focus:ring focus:ring-green-300">
+                        <button type="button" id="togglePassword" class="absolute right-4 top-2.5 text-gray-500">
                             <i class="fas fa-eye" id="toggleIcon"></i>
                         </button>
                     </div>
                 </div>
-            @else
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Tautkan Akun User</label>
-                    <select name="user_id"
-                        class="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="">-- Pilih User --</option>
-                        @foreach ($users as $user)
-                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }} ({{ $user->email }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
             @endif
 
-            <div class="flex items-center justify-center">
+            <div class="flex justify-center mb-8">
                 <button type="submit"
-                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Simpan
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md">
+                    Simpan Perubahan
                 </button>
             </div>
+
         </form>
+
     </div>
 
     <script>
-        document.getElementById('togglePassword').addEventListener('click', function() {
+        // Toggle password visibility
+        document.getElementById('togglePassword')?.addEventListener('click', function() {
             const input = document.getElementById('user_password');
             const icon = this.querySelector('i');
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         });
+
+        // Toggle input tambah ranting
+        document.getElementById('ranting_id')?.addEventListener('change', function() {
+            document.getElementById('new_ranting')
+                .classList.toggle('hidden', this.value !== 'new');
+        });
+
+        // Show/hide ranting section if MWC selected
+        const statusSelect = document.getElementById('status_id');
+        const rantingSection = document.getElementById('ranting_section');
+        const rantingInput = document.getElementById('ranting_id');
+
+        function checkMWC() {
+            const selected = statusSelect.options[statusSelect.selectedIndex].text.toLowerCase();
+
+            if (selected.includes("mwc")) {
+                rantingSection.classList.add('hidden');
+                if (rantingInput) rantingInput.value = "";
+            } else {
+                rantingSection.classList.remove('hidden');
+            }
+        }
+
+        statusSelect?.addEventListener('change', checkMWC);
+        checkMWC(); // first load
     </script>
+
 @endsection

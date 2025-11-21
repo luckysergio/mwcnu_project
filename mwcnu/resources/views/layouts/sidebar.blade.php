@@ -60,16 +60,22 @@
 
     @auth
         @if (in_array(auth()->user()->anggota?->role?->jabatan, ['Admin', 'Tanfidiyah', 'Tanfidiyah ranting', 'Sekretaris']))
+            <li class="nav-item {{ request()->is('data-proker') ? 'active' : '' }}">
+                <a class="nav-link" href="/data-proker">
+                    <i class="fas fa-fw fa-list"></i>
+                    <span>Data Program Kerja</span>
+                </a>
+            </li>
             <li class="nav-item {{ request()->is('proker') ? 'active' : '' }}">
                 <a class="nav-link" href="/proker">
                     <i class="fas fa-fw fa-list"></i>
                     <span>Program kerja</span>
                 </a>
             </li>
-            <li class="nav-item {{ request()->is('data-proker') ? 'active' : '' }}">
-                <a class="nav-link" href="/data-proker">
+            <li class="nav-item {{ request()->is('prokermwc') ? 'active' : '' }}">
+                <a class="nav-link" href="/prokermwc">
                     <i class="fas fa-fw fa-list"></i>
-                    <span>Data Program Kerja</span>
+                    <span>Program kerja MWC</span>
                 </a>
             </li>
         @endif

@@ -22,6 +22,7 @@
         </div>
     @endif
 
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
     @if (session('success'))
         <script>
@@ -42,18 +43,37 @@
         </script>
     @endif
 
-    <form method="GET" class="flex justify-center mb-8">
-        <select name="ranting" onchange="this.form.submit()"
+
+    <form method="GET" class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+
+        {{-- FILTER STATUS --}}
+        <select name="status" id="filterStatus" onchange="toggleRantingDropdown(); this.form.submit()"
             class="w-full max-w-xs px-4 py-3 border rounded-full shadow-md focus:ring-green-400">
+
+            <option value="">Semua Status</option>
+            @foreach ($statusList as $status)
+                <option value="{{ $status->status }}" {{ request('status') == $status->status ? 'selected' : '' }}>
+                    {{ $status->status }}
+                </option>
+            @endforeach
+        </select>
+
+        {{-- FILTER RANTING --}}
+        <select name="ranting" id="filterRanting" onchange="this.form.submit()"
+            class="w-full max-w-xs px-4 py-3 border rounded-full shadow-md focus:ring-green-400" style="display:none;">
             <option value="">Semua Ranting</option>
+
             @foreach ($rantings as $ranting)
                 <option value="{{ $ranting->kelurahan }}" {{ request('ranting') == $ranting->kelurahan ? 'selected' : '' }}>
                     {{ ucfirst($ranting->kelurahan) }}
                 </option>
             @endforeach
         </select>
+
     </form>
 
+
+    {{-- TABLE ANGGOTA --}}
     <div class="bg-white shadow-md rounded-xl overflow-hidden mb-10">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm text-left">
@@ -63,7 +83,6 @@
                         <th class="px-6 py-4 text-center">Email</th>
                         <th class="px-6 py-4 text-center">HP</th>
                         <th class="px-6 py-4 text-center">Jabatan</th>
-                        <th class="px-6 py-4 text-center">Ranting</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
@@ -84,14 +103,8 @@
                             <td class="px-6 py-4 text-center">{{ $item->user?->email ?? 'Belum tertaut' }}</td>
                             <td class="px-6 py-4 text-center">{{ $item->phone }}</td>
                             <td class="px-6 py-4 text-center">{{ $item->role?->jabatan ?? '-' }}</td>
-                            <td class="px-6 py-4 text-center capitalize">{{ $item->ranting?->kelurahan ?? '-' }}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span
-                                    class="px-3 py-1 text-xs font-semibold text-white rounded-full 
-                                    {{ $item->status === 'active' ? 'bg-green-600' : 'bg-red-600' }}">
-                                    {{ ucfirst($item->status) }}
-                                </span>
-                            </td>
+                            <td class="px-6 py-4 text-center">{{ $item->status?->status ?? '-' }}</td>
+
                             <td class="px-6 py-4 text-center">
                                 @php
                                     $isProtected = $item->user?->email === 'admin@mwcnu.com';
@@ -133,7 +146,23 @@
         {{ $anggotas->withQueryString()->links() }}
     </div>
 
+
     <script>
+        function toggleRantingDropdown() {
+            const status = document.getElementById('filterStatus').value;
+            const rantingDropdown = document.getElementById('filterRanting');
+
+            if (status === 'Ranting') {
+                rantingDropdown.style.display = 'block';
+            } else {
+                rantingDropdown.style.display = 'none';
+                rantingDropdown.value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', toggleRantingDropdown);
+
+
         function confirmDelete(id, name) {
             Swal.fire({
                 title: 'Hapus Data?',
@@ -150,9 +179,9 @@
                     form.method = 'POST';
                     form.action = `/anggota/${id}`;
                     form.innerHTML = `
-                        @csrf
-                        <input type="hidden" name="_method" value="DELETE">
-                    `;
+                    @csrf
+                    <input type="hidden" name="_method" value="DELETE">
+                `;
                     document.body.appendChild(form);
                     form.submit();
                 }

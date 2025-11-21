@@ -27,6 +27,11 @@ class Anggota extends Model
         return $this->belongsTo(Ranting::class);
     }
 
+    public function status()
+    {
+        return $this->belongsTo(AnggotaStatus::class, 'status_id');
+    }
+
     public function prokers()
     {
         return $this->hasMany(Proker::class);

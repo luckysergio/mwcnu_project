@@ -38,7 +38,7 @@
                                 <h5 class="fw-bold mb-2">{{ $item->judul }}</h5>
                                 <div class="mt-3">
                                     <p class="mb-1 text-muted">
-                                        <strong>Mengajukan:</strong> {{ $item->anggota->user->name }}
+                                        <strong>Mengajukan:</strong> {{ $item->anggota->name }}
                                     </p>
                                     <p class="mb-1"><strong>Bidang:</strong> {{ $item->bidang->nama }}</p>
                                     <p class="mb-1"><strong>Jenis Kegiatan:</strong> {{ $item->jenis->nama }}</p>

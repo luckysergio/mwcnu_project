@@ -55,4 +55,3 @@ class JabatanRantingController extends Controller
         return back()->with('success', 'Data berhasil dihapus.');
     }
 }
-

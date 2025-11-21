@@ -72,10 +72,10 @@ class ProkerController extends Controller
     public function create()
     {
         return view('pages.programkerja.create', [
-            'bidangs' => Bidang::all(),
-            'jenisKegiatans' => JenisKegiatan::all(),
-            'tujuans' => Tujuan::all(),
-            'sasarans' => Sasaran::all(),
+            'bidangs' => Bidang::orderBy('nama')->get(),
+            'jenisKegiatans' => JenisKegiatan::orderBy('nama')->get(),
+            'tujuans' => Tujuan::orderBy('nama')->get(),
+            'sasarans' => Sasaran::orderBy('nama')->get(),
         ]);
     }
 
@@ -83,28 +83,93 @@ class ProkerController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:100',
-            'bidang_id' => 'required|exists:bidangs,id',
-            'jenis_id' => 'required|exists:jenis_kegiatans,id',
-            'tujuan_id' => 'required|exists:tujuans,id',
-            'sasaran_id' => 'required|exists:sasarans,id',
             'proposal' => 'required|mimes:pdf|max:2048',
             'keterangan' => 'nullable|string'
         ]);
 
-        $file = $request->file('proposal')->store('proposals', 'public');
+        if (!Auth::user()->anggota) {
+            return back()->withErrors('Akun ini belum terhubung dengan data anggota.');
+        }
 
-        Proker::create([
-            'anggota_id' => Auth::user()->anggota->id,
-            'judul' => $request->judul,
-            'bidang_id' => $request->bidang_id,
-            'jenis_id' => $request->jenis_id,
-            'tujuan_id' => $request->tujuan_id,
-            'sasaran_id' => $request->sasaran_id,
-            'proposal' => $file,
-            'keterangan' => $request->keterangan,
-        ]);
 
-        return back()->with('success', 'Program kerja berhasil diajukan.');
+        if ($request->bidang_id === 'add_new') {
+            $request->validate([
+                'new_bidang' => 'required|string|max:50'
+            ]);
+
+            $bidang = Bidang::create(['nama' => $request->new_bidang]);
+            $bidang_id = $bidang->id;
+        } else {
+            $request->validate([
+                'bidang_id' => 'required|exists:bidangs,id'
+            ]);
+            $bidang_id = $request->bidang_id;
+        }
+
+
+        if ($request->jenis_id === 'add_new') {
+            $request->validate([
+                'new_jenis' => 'required|string|max:50'
+            ]);
+
+            $jenis = JenisKegiatan::create(['nama' => $request->new_jenis]);
+            $jenis_id = $jenis->id;
+        } else {
+            $request->validate([
+                'jenis_id' => 'required|exists:jenis_kegiatans,id'
+            ]);
+            $jenis_id = $request->jenis_id;
+        }
+
+
+        if ($request->tujuan_id === 'add_new') {
+            $request->validate([
+                'new_tujuan' => 'required|string|max:50'
+            ]);
+
+            $tujuan = Tujuan::create(['nama' => $request->new_tujuan]);
+            $tujuan_id = $tujuan->id;
+        } else {
+            $request->validate([
+                'tujuan_id' => 'required|exists:tujuans,id'
+            ]);
+            $tujuan_id = $request->tujuan_id;
+        }
+
+
+        if ($request->sasaran_id === 'add_new') {
+            $request->validate([
+                'new_sasaran' => 'required|string|max:50'
+            ]);
+
+            $sasaran = Sasaran::create(['nama' => $request->new_sasaran]);
+            $sasaran_id = $sasaran->id;
+        } else {
+            $request->validate([
+                'sasaran_id' => 'required|exists:sasarans,id'
+            ]);
+            $sasaran_id = $request->sasaran_id;
+        }
+
+        try {
+            $filePath = $request->file('proposal')->store('proposals', 'public');
+
+            Proker::create([
+                'anggota_id' => Auth::user()->anggota->id,
+                'judul' => $request->judul,
+                'bidang_id' => $bidang_id,
+                'jenis_id' => $jenis_id,
+                'tujuan_id' => $tujuan_id,
+                'sasaran_id' => $sasaran_id,
+                'proposal' => $filePath,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            return redirect()->route('proker.index')
+                ->with('success', 'Program kerja berhasil diajukan.');
+        } catch (\Exception $e) {
+            return back()->withErrors('Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
     }
 
     public function edit(Proker $proker)
@@ -122,36 +187,72 @@ class ProkerController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:100',
-            'bidang_id' => 'required|exists:bidangs,id',
-            'jenis_id' => 'required|exists:jenis_kegiatans,id',
-            'tujuan_id' => 'required|exists:tujuans,id',
-            'sasaran_id' => 'required|exists:sasarans,id',
+            'bidang_id' => 'required',
+            'jenis_id' => 'required',
+            'tujuan_id' => 'required',
+            'sasaran_id' => 'required',
             'proposal' => 'nullable|mimes:pdf|max:2048',
             'keterangan' => 'nullable|string',
             'status' => 'required|in:pengajuan,disetujui,ditolak',
         ]);
 
-        if ($request->hasFile('proposal')) {
-            if ($proker->proposal && Storage::exists($proker->proposal)) {
-                Storage::delete($proker->proposal);
-            }
-            $file = $request->file('proposal')->store('proposals');
-            $proker->proposal = $file;
+
+        if ($request->bidang_id === 'add_new') {
+            $request->validate(['new_bidang' => 'required|string']);
+            $request->merge([
+                'bidang_id' => Bidang::create(['nama' => $request->new_bidang])->id
+            ]);
         }
 
+        if ($request->jenis_id === 'add_new') {
+            $request->validate(['new_jenis' => 'required|string']);
+            $request->merge([
+                'jenis_id' => JenisKegiatan::create(['nama' => $request->new_jenis])->id
+            ]);
+        }
+
+        if ($request->tujuan_id === 'add_new') {
+            $request->validate(['new_tujuan' => 'required|string']);
+            $request->merge([
+                'tujuan_id' => Tujuan::create(['nama' => $request->new_tujuan])->id
+            ]);
+        }
+
+        if ($request->sasaran_id === 'add_new') {
+            $request->validate(['new_sasaran' => 'required|string']);
+            $request->merge([
+                'sasaran_id' => Sasaran::create(['nama' => $request->new_sasaran])->id
+            ]);
+        }
+
+
+        if ($request->hasFile('proposal')) {
+
+            if ($proker->proposal && Storage::disk('public')->exists($proker->proposal)) {
+                Storage::disk('public')->delete($proker->proposal);
+            }
+
+            $path = $request->file('proposal')->store('proposals', 'public');
+            $proker->proposal = $path;
+        }
+
+
         $proker->update([
-            'judul' => $request->judul,
-            'bidang_id' => $request->bidang_id,
-            'jenis_id' => $request->jenis_id,
-            'tujuan_id' => $request->tujuan_id,
-            'sasaran_id' => $request->sasaran_id,
-            'keterangan' => $request->keterangan,
-            'status' => $request->status,
-            'proposal' => $proker->proposal,
+            'judul'        => $request->judul,
+            'bidang_id'    => $request->bidang_id,
+            'jenis_id'     => $request->jenis_id,
+            'tujuan_id'    => $request->tujuan_id,
+            'sasaran_id'   => $request->sasaran_id,
+            'keterangan'   => $request->keterangan,
+            'status'       => $request->status,
+            'proposal'     => $proker->proposal,
         ]);
 
-        return back()->with('success', 'Data program kerja berhasil diperbarui.');
+        return redirect()
+            ->route('proker.index')
+            ->with('success', 'Program kerja berhasil diperbarui.');
     }
+
 
     public function destroy(Proker $proker)
     {
