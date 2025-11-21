@@ -7,6 +7,7 @@ use App\Http\Controllers\JabatanRantingController;
 use App\Http\Controllers\JadwalProkerController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ProkerController;
+use App\Http\Controllers\ProkerRantingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -75,4 +76,20 @@ Route::middleware(['auth', 'role:Admin,Tanfidiyah,Tanfidiyah ranting,Sekretaris'
         Route::put('/{laporan}/update', [LaporanController::class, 'update'])->name('laporan.update');
         Route::get('/export/pdf/{id}', [LaporanController::class, 'exportPdf'])->name('laporan.export.pdf');
     });
+
+    Route::middleware(['auth'])
+        ->prefix('proker-ranting')
+        ->name('proker-ranting.')
+        ->group(function () {
+
+            Route::get('/', [ProkerRantingController::class, 'index'])->name('index');
+
+            Route::get('/{id}', [ProkerRantingController::class, 'show'])->name('show');
+
+            Route::post('/{id}/update-status', [ProkerRantingController::class, 'updateStatus'])
+                ->name('update-status');
+
+            Route::post('/{id}/upload-foto', [ProkerRantingController::class, 'uploadFoto'])
+                ->name('upload-foto');
+        });
 });

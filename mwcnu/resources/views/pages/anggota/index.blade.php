@@ -46,7 +46,6 @@
 
     <form method="GET" class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
 
-        {{-- FILTER STATUS --}}
         <select name="status" id="filterStatus" onchange="toggleRantingDropdown(); this.form.submit()"
             class="w-full max-w-xs px-4 py-3 border rounded-full shadow-md focus:ring-green-400">
 
@@ -58,7 +57,6 @@
             @endforeach
         </select>
 
-        {{-- FILTER RANTING --}}
         <select name="ranting" id="filterRanting" onchange="this.form.submit()"
             class="w-full max-w-xs px-4 py-3 border rounded-full shadow-md focus:ring-green-400" style="display:none;">
             <option value="">Semua Ranting</option>
@@ -73,7 +71,6 @@
     </form>
 
 
-    {{-- TABLE ANGGOTA --}}
     <div class="bg-white shadow-md rounded-xl overflow-hidden mb-10">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm text-left">

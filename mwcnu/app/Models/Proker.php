@@ -18,6 +18,11 @@ class Proker extends Model
         return $this->belongsTo(Anggota::class);
     }
 
+    public function ranting()
+    {
+        return $this->belongsTo(Ranting::class);
+    }
+
     public function bidang()
     {
         return $this->belongsTo(Bidang::class);

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('kegiatan');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
+            $table->json('foto')->nullable();
             $table->text('catatan')->nullable();
             $table->timestamps();
 

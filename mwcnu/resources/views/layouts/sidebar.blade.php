@@ -78,6 +78,12 @@
                     <span>Program kerja MWC</span>
                 </a>
             </li>
+            <li class="nav-item {{ request()->is('proker-ranting') ? 'active' : '' }}">
+                <a class="nav-link" href="/proker-ranting">
+                    <i class="fas fa-fw fa-list"></i>
+                    <span>Program kerja ranting</span>
+                </a>
+            </li>
         @endif
     @endauth
 

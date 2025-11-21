@@ -40,6 +40,7 @@
                                     <p class="mb-1 text-muted">
                                         <strong>Mengajukan:</strong> {{ $item->anggota->name }}
                                     </p>
+                                    <p class="mb-1"><strong>Ranting:</strong> {{ $item->ranting->kelurahan ?? '-' }}</p>
                                     <p class="mb-1"><strong>Bidang:</strong> {{ $item->bidang->nama }}</p>
                                     <p class="mb-1"><strong>Jenis Kegiatan:</strong> {{ $item->jenis->nama }}</p>
                                     <p class="mb-1"><strong>Tujuan:</strong> {{ $item->tujuan->nama }}</p>

@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('prokers', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('anggota_id');
+            $table->unsignedBigInteger('anggota_id')->index();
+            $table->unsignedBigInteger('ranting_id')->nullable()->index();
+
             $table->string('judul', 100);
 
             $table->unsignedBigInteger('bidang_id');
@@ -30,6 +32,9 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('anggota_id')->references('id')->on('anggotas')->onDelete('cascade');
+
+            $table->foreign('ranting_id')->references('id')->on('rantings')->nullOnDelete();
+
             $table->foreign('bidang_id')->references('id')->on('bidangs')->onDelete('cascade');
             $table->foreign('jenis_id')->references('id')->on('jenis_kegiatans')->onDelete('cascade');
             $table->foreign('tujuan_id')->references('id')->on('tujuans')->onDelete('cascade');

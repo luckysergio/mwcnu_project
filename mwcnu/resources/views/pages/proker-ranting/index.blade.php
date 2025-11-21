@@ -3,8 +3,29 @@
 @section('content')
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
+        @if (isset($listRanting))
+            <div class="flex justify-center mb-6">
+                <form method="GET" action="{{ route('proker-ranting.index') }}">
+                    <select name="ranting_id" id="filterRanting" onchange="this.form.submit()"
+                        class="w-full max-w-xs px-4 py-3 border rounded-full shadow-md focus:ring-green-400">
+
+                        <option value="">Semua Ranting</option>
+
+                        @foreach ($listRanting as $ranting)
+                            <option value="{{ $ranting->id }}"
+                                {{ request('ranting_id') == $ranting->id ? 'selected' : '' }}>
+                                {{ ucfirst($ranting->kelurahan) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
+        @endif
+
         <div class="text-center mb-6">
-            <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">Program Kerja Terjadwal</h3>
+            <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">
+                Program Kerja Terjadwal
+            </h3>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -17,19 +38,17 @@
                     </div>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li>
-                            <i class="fas fa-tasks text-blue-400 mr-2"></i>
                             <strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}
                         </li>
                         <li>
-                            <i class="fas fa-calendar-alt text-emerald-500 mr-2"></i>
-                            <strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
+                            <strong>Mulai:</strong>
+                            {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
                         </li>
                         <li>
-                            <i class="fas fa-calendar-check text-emerald-700 mr-2"></i>
-                            <strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
+                            <strong>Selesai:</strong>
+                            {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
                         </li>
                         <li>
-                            <i class="fas fa-sticky-note text-gray-400 mr-2"></i>
                             <strong>Catatan:</strong> {{ $item->catatan ?? '-' }}
                         </li>
                     </ul>
@@ -41,8 +60,11 @@
             @endforelse
         </div>
 
+
         <div class="text-center mt-12 mb-6">
-            <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">Program Kerja Sedang Berjalan</h3>
+            <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">
+                Program Kerja Sedang Berjalan
+            </h3>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -55,19 +77,17 @@
                     </div>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li>
-                            <i class="fas fa-tasks text-blue-400 mr-2"></i>
                             <strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}
                         </li>
                         <li>
-                            <i class="fas fa-calendar-alt text-emerald-500 mr-2"></i>
-                            <strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
+                            <strong>Mulai:</strong>
+                            {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
                         </li>
                         <li>
-                            <i class="fas fa-calendar-check text-emerald-700 mr-2"></i>
-                            <strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
+                            <strong>Selesai:</strong>
+                            {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
                         </li>
                         <li>
-                            <i class="fas fa-sticky-note text-gray-400 mr-2"></i>
                             <strong>Catatan:</strong> {{ $item->catatan ?? '-' }}
                         </li>
                     </ul>
@@ -79,9 +99,11 @@
             @endforelse
         </div>
 
+
         <div class="text-center mt-12 mb-6">
-            <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">Program Kerja Sudah Selesai
-                Dilaksanakan</h3>
+            <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">
+                Program Kerja Sudah Selesai Dilaksanakan
+            </h3>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -94,19 +116,17 @@
                     </div>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li>
-                            <i class="fas fa-tasks text-blue-400 mr-2"></i>
                             <strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}
                         </li>
                         <li>
-                            <i class="fas fa-calendar-alt text-emerald-500 mr-2"></i>
-                            <strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
+                            <strong>Mulai:</strong>
+                            {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}
                         </li>
                         <li>
-                            <i class="fas fa-calendar-check text-emerald-700 mr-2"></i>
-                            <strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
+                            <strong>Selesai:</strong>
+                            {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}
                         </li>
                         <li>
-                            <i class="fas fa-sticky-note text-gray-400 mr-2"></i>
                             <strong>Catatan:</strong> {{ $item->catatan ?? '-' }}
                         </li>
                     </ul>

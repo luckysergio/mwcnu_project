@@ -57,6 +57,7 @@
                             class="text-gray-800">{{ $item->anggota->name }}</strong></p>
 
                     <div class="text-sm text-gray-700 space-y-1">
+                        <p><strong>Ranting:</strong> {{ $item->ranting->kelurahan ?? '-' }}</p>
                         <p><strong>Bidang:</strong> {{ $item->bidang->nama }}</p>
                         <p><strong>Jenis Kegiatan:</strong> {{ $item->jenis->nama }}</p>
                         <p><strong>Tujuan:</strong> {{ $item->tujuan->nama }}</p>
