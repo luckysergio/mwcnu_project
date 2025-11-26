@@ -161,7 +161,6 @@ class JadwalProkerController extends Controller
         return redirect()->route('jadwal-proker.index')->with('success', 'Jadwal berhasil diperbarui.');
     }
 
-
     public function destroy($id)
     {
         $jadwal = JadwalProker::findOrFail($id);

@@ -7,6 +7,7 @@ use App\Http\Controllers\JabatanRantingController;
 use App\Http\Controllers\JadwalProkerController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ProkerController;
+use App\Http\Controllers\ProkerMwcController;
 use App\Http\Controllers\ProkerRantingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -78,17 +79,36 @@ Route::middleware(['auth', 'role:Admin,Tanfidiyah,Tanfidiyah ranting,Sekretaris'
     });
 
     Route::middleware(['auth'])
-    ->prefix('proker-ranting')
-    ->name('proker-ranting.')
+        ->prefix('proker-ranting')
+        ->name('proker-ranting.')
+        ->group(function () {
+
+            Route::get('/', [ProkerRantingController::class, 'index'])->name('index');
+            Route::get('/{id}', [ProkerRantingController::class, 'show'])->name('show');
+            Route::post('/{id}/update-status', [ProkerRantingController::class, 'updateStatus'])
+                ->name('update-status');
+
+            Route::post('/{id}/upload-foto', [ProkerRantingController::class, 'uploadFoto'])
+                ->name('upload-foto');
+        });
+
+    Route::middleware(['auth'])
+    ->prefix('proker-mwc')
+    ->name('proker-mwc.')
     ->group(function () {
 
-        Route::get('/', [ProkerRantingController::class, 'index'])->name('index');
-        Route::get('/{id}', [ProkerRantingController::class, 'show'])->name('show');
-        Route::post('/{id}/update-status', [ProkerRantingController::class, 'updateStatus'])
-            ->name('update-status');
+        Route::get('/', [ProkerMwcController::class, 'index'])->name('index');
+        Route::get('/create', [ProkerMwcController::class, 'create'])->name('create');
+        Route::post('/', [ProkerMwcController::class, 'store'])->name('store');
 
-        Route::post('/{id}/upload-foto', [ProkerRantingController::class, 'uploadFoto'])
-            ->name('upload-foto');
+        Route::get('/{id}/edit', [ProkerMwcController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProkerMwcController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ProkerMwcController::class, 'destroy'])->name('destroy');
+
+        Route::get('/submitted', [ProkerMwcController::class, 'submitted'])->name('submitted');
+        Route::post('/{id}/approve', [ProkerMwcController::class, 'approve'])->name('approve');
+
+        Route::post('/{id}/pilih', [ProkerMwcController::class, 'pilih'])->name('pilih');
     });
 
 });

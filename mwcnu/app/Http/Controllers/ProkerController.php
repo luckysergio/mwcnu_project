@@ -232,7 +232,6 @@ class ProkerController extends Controller
             ->with('success', 'Program kerja berhasil diperbarui.');
     }
 
-
     public function destroy(Proker $proker)
     {
         if ($proker->proposal && Storage::exists($proker->proposal)) {

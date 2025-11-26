@@ -72,8 +72,8 @@
                     <span>Program kerja</span>
                 </a>
             </li>
-            <li class="nav-item {{ request()->is('prokermwc') ? 'active' : '' }}">
-                <a class="nav-link" href="/prokermwc">
+            <li class="nav-item {{ request()->is('proker-mwc') ? 'active' : '' }}">
+                <a class="nav-link" href="/proker-mwc">
                     <i class="fas fa-fw fa-list"></i>
                     <span>Program kerja MWC</span>
                 </a>
