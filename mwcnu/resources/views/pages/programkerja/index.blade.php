@@ -70,14 +70,18 @@
 
                 @auth
                     @php
-                        $jabatan = auth()->user()->anggota->role->jabatan ?? null;
+                        $anggota = auth()->user()->anggota;
+                        $jabatan = $anggota->role->jabatan ?? null;
+                        $statusAnggota = $anggota->status->status ?? null;
                     @endphp
-                    @if (in_array($jabatan, ['Admin', 'Tanfidiyah']))
+
+                    @if (in_array($jabatan, ['Admin', 'Tanfidiyah']) && $statusAnggota === 'MWC')
                         <div class="mt-5 flex flex-col gap-3">
                             <a href="{{ route('proker.edit', $item->id) }}"
                                 class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm rounded-lg shadow transition">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
+
                             <button type="button" onclick="confirmDelete('{{ $item->id }}', '{{ $item->judul }}')"
                                 class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg shadow transition">
                                 <i class="fas fa-trash-alt"></i> Hapus
@@ -85,6 +89,7 @@
                         </div>
                     @endif
                 @endauth
+
             </div>
         @empty
             <div class="col-span-full text-center text-gray-400 italic">

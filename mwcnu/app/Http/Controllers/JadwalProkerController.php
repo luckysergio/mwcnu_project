@@ -14,7 +14,14 @@ class JadwalProkerController extends Controller
 {
     public function countUnassignedProker()
     {
+        $user = Auth::user();
+        $anggotaStatus = $user->anggota->status->status ?? null;
+        $rantingId = $user->anggota->ranting_id;
+
         $count = Proker::where('status', 'disetujui')
+            ->when($anggotaStatus !== 'MWC', function ($q) use ($rantingId) {
+                $q->where('ranting_id', $rantingId);
+            })
             ->doesntHave('jadwalProker')
             ->count();
 
@@ -39,6 +46,7 @@ class JadwalProkerController extends Controller
             $jadwalsQuery->where('status', $request->status);
         }
 
+        // Jika bukan MWC, filter berdasarkan ranting
         if ($anggotaStatus !== 'MWC') {
             $jadwalsQuery->whereHas('proker', function ($q) use ($rantingId) {
                 $q->where('ranting_id', $rantingId);
@@ -60,8 +68,16 @@ class JadwalProkerController extends Controller
 
     public function create()
     {
+        $user = Auth::user();
+        $anggotaStatus = $user->anggota->status->status ?? null;
+        $rantingId = $user->anggota->ranting_id;
+
+        // Filter proker sesuai ranting jika bukan MWC
         $prokers = Proker::where('status', 'disetujui')
             ->doesntHave('jadwalProker')
+            ->when($anggotaStatus !== 'MWC', function ($q) use ($rantingId) {
+                $q->where('ranting_id', $rantingId);
+            })
             ->get();
 
         return view('pages.jadwal_proker.create', compact('prokers'));
@@ -81,8 +97,18 @@ class JadwalProkerController extends Controller
             'catatan' => 'nullable|array'
         ]);
 
-        DB::transaction(function () use ($request) {
-            $proker = Proker::findOrFail($request->proker_id);
+        $user = Auth::user();
+        $anggotaStatus = $user->anggota->status->status ?? null;
+        $rantingId = $user->anggota->ranting_id;
+
+        $proker = Proker::findOrFail($request->proker_id);
+
+        // Pastikan user ranting tidak bisa membuat jadwal untuk ranting lain
+        if ($anggotaStatus !== 'MWC' && $proker->ranting_id != $rantingId) {
+            abort(403, "Anda tidak dapat membuat jadwal untuk proker ranting lain.");
+        }
+
+        DB::transaction(function () use ($request, $proker) {
             $jadwal = JadwalProker::create([
                 'proker_id' => $request->proker_id,
                 'penanggung_jawab_id' => $proker->anggota_id,
@@ -105,9 +131,22 @@ class JadwalProkerController extends Controller
 
     public function edit($id)
     {
+        $user = Auth::user();
+        $anggotaStatus = $user->anggota->status->status ?? null;
+        $rantingId = $user->anggota->ranting_id;
+
         $jadwal = JadwalProker::with(['details', 'proker'])->findOrFail($id);
+
+        // Batasi akses edit hanya untuk ranting sama
+        if ($anggotaStatus !== 'MWC' && $jadwal->proker->ranting_id != $rantingId) {
+            abort(403, "Anda tidak memiliki akses untuk mengedit jadwal proker ini.");
+        }
+
         $prokers = Proker::whereDoesntHave('jadwalProker')
             ->orWhere('id', $jadwal->proker_id)
+            ->when($anggotaStatus !== 'MWC', function ($q) use ($rantingId) {
+                $q->where('ranting_id', $rantingId);
+            })
             ->get();
 
         return view('pages.jadwal_proker.edit', compact('jadwal', 'prokers'));
@@ -132,21 +171,28 @@ class JadwalProkerController extends Controller
             'catatan.*' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($request, $id) {
-            $jadwal = JadwalProker::findOrFail($id);
-            $proker = Proker::findOrFail($request->proker_id);
+        $user = Auth::user();
+        $anggotaStatus = $user->anggota->status->status ?? null;
+        $rantingId = $user->anggota->ranting_id;
 
-            // Update header
+        $proker = Proker::findOrFail($request->proker_id);
+
+        // Validasi akses update
+        if ($anggotaStatus !== 'MWC' && $proker->ranting_id != $rantingId) {
+            abort(403, "Anda tidak dapat mengubah jadwal untuk proker milik ranting lain.");
+        }
+
+        DB::transaction(function () use ($request, $id, $proker) {
+            $jadwal = JadwalProker::findOrFail($id);
+
             $jadwal->update([
                 'proker_id' => $request->proker_id,
                 'penanggung_jawab_id' => $proker->anggota_id,
                 'status' => $request->status,
             ]);
 
-            // Hapus semua detail lama
             $jadwal->details()->delete();
 
-            // Tambah detail baru
             foreach ($request->kegiatan as $i => $keg) {
                 JadwalProkerDetail::create([
                     'jadwal_proker_id' => $jadwal->id,
@@ -163,8 +209,19 @@ class JadwalProkerController extends Controller
 
     public function destroy($id)
     {
-        $jadwal = JadwalProker::findOrFail($id);
+        $user = Auth::user();
+        $anggotaStatus = $user->anggota->status->status ?? null;
+        $rantingId = $user->anggota->ranting_id;
+
+        $jadwal = JadwalProker::with('proker')->findOrFail($id);
+
+        // Batasi delete berdasarkan ranting
+        if ($anggotaStatus !== 'MWC' && $jadwal->proker->ranting_id != $rantingId) {
+            abort(403, "Anda tidak dapat menghapus jadwal ini.");
+        }
+
         $jadwal->delete();
+
         return back()->with('success', 'Jadwal berhasil dihapus.');
     }
 

@@ -21,7 +21,6 @@
             </div>
         @endif
 
-        {{-- Program Kerja Terjadwal --}}
         <div class="text-center mb-6">
             <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">
                 Program Kerja Terjadwal
@@ -35,6 +34,10 @@
                         <h4 class="text-lg font-semibold text-gray-800">
                             {{ $item->jadwalProker->proker->judul ?? '-' }}
                         </h4>
+
+                        <p class="text-sm text-gray-600">
+                            {{ $item->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
+                        </p>
                     </div>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li><strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}</li>
@@ -67,6 +70,10 @@
                             <h4 class="text-lg font-semibold text-gray-800">
                                 {{ $item->jadwalProker->proker->judul ?? '-' }}
                             </h4>
+
+                            <p class="text-sm text-gray-600">
+                                {{ $item->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
+                            </p>
                         </div>
                         <ul class="space-y-2 text-sm text-gray-600 mb-4">
                             <li><strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}</li>
@@ -163,6 +170,10 @@
                         <h4 class="text-lg font-semibold text-gray-800">
                             {{ $item->jadwalProker->proker->judul ?? '-' }}
                         </h4>
+
+                        <p class="text-sm text-gray-600">
+                            {{ $item->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
+                        </p>
                     </div>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li><strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}</li>
