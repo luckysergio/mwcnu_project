@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-
 class JadwalProkerController extends Controller
 {
     public function countUnassignedProker()
@@ -169,6 +168,10 @@ class JadwalProkerController extends Controller
 
             'catatan' => 'nullable|array',
             'catatan.*' => 'nullable|string',
+
+            // optional: jika form mengirimkan id detail
+            'detail_id' => 'nullable|array',
+            'detail_id.*' => 'nullable|integer|exists:jadwal_proker_details,id',
         ]);
 
         $user = Auth::user();
@@ -191,16 +194,74 @@ class JadwalProkerController extends Controller
                 'status' => $request->status,
             ]);
 
-            $jadwal->details()->delete();
+            /**
+             * Dua alur:
+             * 1) Jika form mengirim detail_id[] => lakukan update per-row berdasarkan id.
+             *    - Hapus detail yang tidak dikirim
+             *    - Update detail yang ada (foto dipertahankan karena tidak diubah di sini)
+             *    - Buat detail baru bila ada (detail_id null atau kosong)
+             *
+             * 2) Jika form TIDAK mengirim detail_id[] => fallback: simpan foto lama berdasarkan index
+             *    (backup foto dari old details per urutan), hapus semuanya lalu recreate,
+             *    dan restore foto dari backup berdasarkan index jika ada.
+             */
 
-            foreach ($request->kegiatan as $i => $keg) {
-                JadwalProkerDetail::create([
-                    'jadwal_proker_id' => $jadwal->id,
-                    'kegiatan' => $keg,
-                    'tanggal_mulai' => $request->tanggal_mulai[$i],
-                    'tanggal_selesai' => $request->tanggal_selesai[$i],
-                    'catatan' => $request->catatan[$i] ?? null,
-                ]);
+            $inputDetailIds = $request->input('detail_id', null);
+
+            if (is_array($inputDetailIds)) {
+                // ALUR 1: update berdasarkan detail_id[]
+                $inputIdsFiltered = array_filter($inputDetailIds, fn($v) => !empty($v));
+                // Hapus detail yang tidak ada dalam input (keep foto di row yang diupdate)
+                $jadwal->details()->whereNotIn('id', $inputIdsFiltered)->delete();
+
+                // iterate over input rows: if id exists -> update; if empty -> create
+                foreach ($request->kegiatan as $i => $keg) {
+                    $detailId = $inputDetailIds[$i] ?? null;
+                    $data = [
+                        'kegiatan' => $keg,
+                        'tanggal_mulai' => $request->tanggal_mulai[$i],
+                        'tanggal_selesai' => $request->tanggal_selesai[$i],
+                        'catatan' => $request->catatan[$i] ?? null,
+                    ];
+
+                    if ($detailId) {
+                        // update existing (foto tetap)
+                        $detail = JadwalProkerDetail::find($detailId);
+                        if ($detail) {
+                            $detail->update($data);
+                        } else {
+                            // jika id tidak ditemukan (safety), buat baru
+                            $data['jadwal_proker_id'] = $jadwal->id;
+                            JadwalProkerDetail::create($data);
+                        }
+                    } else {
+                        // create new
+                        $data['jadwal_proker_id'] = $jadwal->id;
+                        JadwalProkerDetail::create($data);
+                    }
+                }
+            } else {
+                // ALUR 2: fallback (form lama tanpa detail_id[])
+                // backup foto lama berdasarkan urutan
+                $oldDetails = $jadwal->details()->get()->values();
+                $oldFotos = $oldDetails->map(fn($d) => $d->foto)->toArray();
+
+                // delete all old details
+                $jadwal->details()->delete();
+
+                // recreate, dan restore foto jika ada berdasarkan index
+                foreach ($request->kegiatan as $i => $keg) {
+                    $fotoRestore = $oldFotos[$i] ?? null;
+
+                    JadwalProkerDetail::create([
+                        'jadwal_proker_id' => $jadwal->id,
+                        'kegiatan' => $keg,
+                        'tanggal_mulai' => $request->tanggal_mulai[$i],
+                        'tanggal_selesai' => $request->tanggal_selesai[$i],
+                        'catatan' => $request->catatan[$i] ?? null,
+                        'foto' => $fotoRestore,
+                    ]);
+                }
             }
         });
 
