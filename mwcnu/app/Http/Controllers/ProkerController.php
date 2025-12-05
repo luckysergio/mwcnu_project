@@ -10,12 +10,21 @@ use App\Models\Tujuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
 
 class ProkerController extends Controller
 {
     public function proker_request()
     {
-        $prokers = Proker::with(['anggota.user', 'bidang', 'jenis', 'tujuan', 'sasaran'])
+        $prokers = Proker::with([
+            'anggota.user',
+            'bidang',
+            'jenis',
+            'tujuan',
+            'sasaran',
+            'jadwalProker',
+        ])
             ->where('status', 'pengajuan')
             ->latest()
             ->get();
@@ -29,17 +38,66 @@ class ProkerController extends Controller
             'for' => 'required|in:approve,reject',
         ]);
 
-        $proker = Proker::findOrFail($prokerId);
+        $proker = Proker::with('anggota.status', 'jadwalProker')->findOrFail($prokerId);
 
-        $proker->status = $request->for === 'approve' ? 'disetujui' : 'ditolak';
-        $proker->save();
+        $statusPembuat = $proker->anggota->status->status ?? null;
 
-        $message = $request->for === 'approve'
-            ? 'Program kerja berhasil disetujui.'
-            : 'Program kerja berhasil ditolak.';
+        if ($statusPembuat === 'MWC') {
+
+            if ($request->for === 'approve') {
+
+                $proker->status = 'disetujui';
+                $proker->save();
+
+                $message = 'Proker MWC berhasil disetujui.';
+            } else { // === REJECT MWC ===
+
+                DB::beginTransaction();
+
+                try {
+                    // Update proker
+                    $proker->update([
+                        'status'     => 'disetujui', // atau 'perlu direvisi' jika mau
+                        'ranting_id' => null,
+                    ]);
+
+                    // HAPUS jadwalnya, bukan hanya dikosongkan
+                    if ($proker->jadwalProker) {
+                        $proker->jadwalProker()->delete();
+                    }
+
+                    DB::commit();
+
+                    $message = 'Proker MWC ditolak oleh Ranting dan jadwal dihapus.';
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    return back()->withErrors('Gagal memproses reject MWC: ' . $e->getMessage());
+                }
+            }
+        } elseif ($statusPembuat === 'Ranting') {
+
+            if ($request->for === 'approve') {
+                $proker->status = 'disetujui';
+                $message = 'Proker Ranting berhasil disetujui.';
+            } else {
+                $proker->status = 'ditolak';
+
+                // Optional: kalau mau saat reject ranting juga hapus jadwal
+                if ($proker->jadwalProker) {
+                    $proker->jadwalProker()->delete();
+                }
+
+                $message = 'Proker Ranting ditolak dan jadwal dihapus.';
+            }
+
+            $proker->save();
+        } else {
+            return back()->withErrors('Status pembuat proker tidak valid.');
+        }
 
         return back()->with('success', $message);
     }
+
 
     public function countSubmittedProker()
     {

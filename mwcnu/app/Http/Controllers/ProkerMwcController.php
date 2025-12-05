@@ -10,24 +10,26 @@ use App\Models\Tujuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\JadwalProker;
+use Illuminate\Support\Facades\DB;
+
 
 class ProkerMwcController extends Controller
 {
     public function index()
-{
-    $anggota = Auth::user()->anggota;
-    $status  = $anggota->status->status ?? null;
-    $rantingId = $anggota->ranting_id ?? null;
+    {
+        $anggota = Auth::user()->anggota;
+        $status  = $anggota->status->status ?? null;
+        $rantingId = $anggota->ranting_id ?? null;
 
-    // Ambil semua Proker MWC
-    $prokers = Proker::with(['bidang', 'jenis', 'tujuan', 'sasaran', 'ranting'])
-        ->whereHas('anggota.status', fn($s) => $s->where('status', 'MWC'))
-        ->orderBy('created_at', 'desc')
-        ->get();
+        // Ambil semua Proker MWC
+        $prokers = Proker::with(['bidang', 'jenis', 'tujuan', 'sasaran', 'ranting'])
+            ->whereHas('anggota.status', fn($s) => $s->where('status', 'MWC'))
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    return view('pages.prokermwc.index', compact('prokers', 'status', 'rantingId'));
-}
-
+        return view('pages.prokermwc.index', compact('prokers', 'status', 'rantingId'));
+    }
 
     public function create()
     {
@@ -229,15 +231,18 @@ class ProkerMwcController extends Controller
 
         return back()->with('success', 'Proker MWC berhasil dihapus.');
     }
-
-
-    public function pilih($id)
+    public function pilih(Request $request, $id)
     {
         $anggota = Auth::user()->anggota;
 
         if ($anggota->status->status !== 'Ranting') {
             abort(403, 'Hanya anggota ranting yang bisa memilih proker.');
         }
+
+        $request->validate([
+            'estimasi_mulai'   => 'required|date',
+            'estimasi_selesai' => 'required|date|after_or_equal:estimasi_mulai'
+        ]);
 
         $proker = Proker::findOrFail($id);
 
@@ -249,10 +254,30 @@ class ProkerMwcController extends Controller
             return back()->withErrors('Proker ini sudah dipilih oleh ranting lain.');
         }
 
-        $proker->update([
-            'ranting_id' => $anggota->ranting_id
-        ]);
+        DB::beginTransaction();
 
-        return back()->with('success', 'Anda berhasil memilih Proker MWC.');
+        try {
+
+            $proker->update([
+                'ranting_id' => $anggota->ranting_id,
+                'status'     => 'pengajuan',
+            ]);
+
+            JadwalProker::create([
+                'proker_id'            => $proker->id,
+                'penanggung_jawab_id'  => $anggota->id,
+                'estimasi_mulai'        => $request->estimasi_mulai,
+                'estimasi_selesai'      => $request->estimasi_selesai,
+                'status'                => 'penjadwalan'
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Proker berhasil dipilih dan estimasi jadwal disimpan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->withErrors('Terjadi kesalahan saat memilih proker.');
+        }
     }
 }

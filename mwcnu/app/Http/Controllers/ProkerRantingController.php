@@ -19,34 +19,33 @@ class ProkerRantingController extends Controller
         }
 
         $anggotaStatus = $user->anggota->status->status ?? null;
-
         $rantingId = $user->anggota->ranting_id;
-
 
         if ($anggotaStatus === 'MWC') {
 
             $listRanting = Ranting::all();
-
             $selectedRanting = $request->get('ranting_id');
 
             if ($selectedRanting) {
 
                 $penjadwalan = $this->getProkerByStatus($selectedRanting, 'penjadwalan');
                 $berjalan    = $this->getProkerByStatus($selectedRanting, 'berjalan');
-                $selesai     = $this->getProkerByStatus($selectedRanting, 'selesai');
+                $selesai     = $this->getProkerSelesaiGroup($selectedRanting);
+
             } else {
 
-                $penjadwalan = JadwalProkerDetail::whereHas('jadwalProker', function ($q) {
-                    $q->where('status', 'penjadwalan');
-                })->get();
+                $penjadwalan = JadwalProkerDetail::with('jadwalProker.proker.ranting')
+                    ->whereHas('jadwalProker', fn ($q) => $q->where('status', 'penjadwalan'))
+                    ->get();
 
-                $berjalan = JadwalProkerDetail::whereHas('jadwalProker', function ($q) {
-                    $q->where('status', 'berjalan');
-                })->get();
+                $berjalan = JadwalProkerDetail::with('jadwalProker.proker.ranting')
+                    ->whereHas('jadwalProker', fn ($q) => $q->where('status', 'berjalan'))
+                    ->get();
 
-                $selesai = JadwalProkerDetail::whereHas('jadwalProker', function ($q) {
-                    $q->where('status', 'selesai');
-                })->get();
+                $selesai = JadwalProkerDetail::with('jadwalProker.proker.ranting')
+                    ->whereHas('jadwalProker', fn ($q) => $q->where('status', 'selesai'))
+                    ->get()
+                    ->groupBy(fn ($item) => $item->jadwalProker->proker->id);
             }
 
             return view('pages.proker-ranting.index', compact(
@@ -58,10 +57,10 @@ class ProkerRantingController extends Controller
             ));
         }
 
-        
+        // Selain MWC (Ranting biasa)
         $penjadwalan = $this->getProkerByStatus($rantingId, 'penjadwalan');
         $berjalan    = $this->getProkerByStatus($rantingId, 'berjalan');
-        $selesai     = $this->getProkerByStatus($rantingId, 'selesai');
+        $selesai     = $this->getProkerSelesaiGroup($rantingId);
 
         return view('pages.proker-ranting.index', compact(
             'penjadwalan',
@@ -69,22 +68,35 @@ class ProkerRantingController extends Controller
             'selesai'
         ));
     }
+
+    // Untuk PENJADWALAN & BERJALAN → Masih per kegiatan (detail)
     private function getProkerByStatus($rantingId, $status)
     {
-        return JadwalProkerDetail::whereHas('jadwalProker', function ($q) use ($rantingId, $status) {
+        return JadwalProkerDetail::with('jadwalProker.proker.ranting')
+            ->whereHas('jadwalProker', function ($q) use ($rantingId, $status) {
 
-            $q->where('status', $status)
+                $q->where('status', $status)
+                    ->whereHas('proker', fn ($sub) => $sub->where('ranting_id', $rantingId));
+            })->get();
+    }
 
-                ->whereHas('proker', function ($sub) use ($rantingId) {
-                    $sub->where('ranting_id', $rantingId);
-                });
-        })->get();
+    // ✅ KHUSUS SELESAI — DIGROUP PER PROKER
+    private function getProkerSelesaiGroup($rantingId)
+    {
+        return JadwalProkerDetail::with('jadwalProker.proker.ranting')
+            ->whereHas('jadwalProker', function ($q) use ($rantingId) {
+
+                $q->where('status', 'selesai')
+                    ->whereHas('proker', fn ($sub) => $sub->where('ranting_id', $rantingId));
+            })
+            ->get()
+            ->groupBy(fn ($item) => $item->jadwalProker->proker->id);
     }
 
     public function uploadFoto(Request $request, $id)
     {
         $request->validate([
-            'foto.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // max 5MB per foto
+            'foto.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         $prokerDetail = JadwalProkerDetail::findOrFail($id);
@@ -93,7 +105,7 @@ class ProkerRantingController extends Controller
 
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $file) {
-                $path = $file->store('proker', 'public'); // simpan di storage/app/public/proker
+                $path = $file->store('proker', 'public');
                 $uploadedFiles[] = $path;
             }
 

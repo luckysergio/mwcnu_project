@@ -3,11 +3,10 @@
 @section('content')
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        {{-- Filter Ranting --}}
         @if (isset($listRanting))
             <div class="flex justify-center mb-6">
                 <form method="GET" action="{{ route('proker-ranting.index') }}">
-                    <select name="ranting_id" id="filterRanting" onchange="this.form.submit()"
+                    <select name="ranting_id" onchange="this.form.submit()"
                         class="w-full max-w-xs px-4 py-3 border rounded-full shadow-md focus:ring-green-400">
                         <option value="">Semua Ranting</option>
                         @foreach ($listRanting as $ranting)
@@ -27,25 +26,48 @@
             </h3>
         </div>
 
+        @php
+            $penjadwalanGroup = $penjadwalan->groupBy(fn($item) => $item->jadwalProker->proker->id);
+        @endphp
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @forelse ($penjadwalan as $item)
-                <div class="bg-gray-50 rounded-2xl shadow hover:shadow-md transition p-6">
+            @forelse ($penjadwalanGroup as $group)
+                @php $firstItem = $group->first(); @endphp
+
+                <div class="bg-gray-100 rounded-2xl shadow hover:shadow-md transition p-6">
+
                     <div class="text-center mb-4">
                         <h4 class="text-lg font-semibold text-gray-800">
-                            {{ $item->jadwalProker->proker->judul ?? '-' }}
+                            {{ $firstItem->jadwalProker->proker->judul ?? '-' }}
                         </h4>
 
                         <p class="text-sm text-gray-600">
-                            {{ $item->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
+                            {{ $firstItem->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
                         </p>
                     </div>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}</li>
-                        <li><strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</li>
-                        <li><strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</li>
-                        <li><strong>Catatan:</strong> {{ $item->catatan ?? '-' }}</li>
-                    </ul>
+
+                    <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
+                        @foreach ($group as $detail)
+                            <div class="p-3 bg-white border border-gray-200 rounded-lg text-center">
+                                <p class="font-semibold text-gray-800">
+                                    {{ $detail->kegiatan ?? '-' }}
+                                </p>
+
+                                <p class="text-xs text-gray-500">
+                                    {{ \Carbon\Carbon::parse($detail->tanggal_mulai)->format('d M Y') }}
+                                    -
+                                    {{ \Carbon\Carbon::parse($detail->tanggal_selesai)->format('d M Y') }}
+                                </p>
+
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ $detail->catatan ?? '-' }}
+                                </p>
+                            </div>
+                        @endforeach
+                    </div>
+
                 </div>
+
             @empty
                 <div class="col-span-full text-center text-gray-400 py-10">
                     Tidak ada Program kerja
@@ -53,118 +75,149 @@
             @endforelse
         </div>
 
-        {{-- PROGRAM BERJALAN --}}
         <div class="text-center mt-12 mb-6">
             <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">
                 Program Kerja Sedang Berjalan
             </h3>
         </div>
 
+        @php
+            $berjalanGroup = $berjalan->groupBy(fn($item) => $item->jadwalProker->proker->id);
+        @endphp
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @forelse ($berjalan as $item)
-                <div class="bg-white rounded-2xl shadow hover:shadow-md transition p-6 flex flex-col justify-between"
-                    x-data="{ 
-                        openUpload: false, 
-                        openGallery: false, 
-                        currentIndex: 0, 
-                        fotos: {{ $item->foto ? json_encode(json_decode($item->foto, true)) : '[]' }} 
-                    }">
+            @forelse ($berjalanGroup as $group)
+                @php $firstItem = $group->first(); @endphp
 
-                    <div>
-                        <div class="text-center mb-4">
-                            <h4 class="text-lg font-semibold text-gray-800">
-                                {{ $item->jadwalProker->proker->judul ?? '-' }}
-                            </h4>
+                <div class="bg-gray-100 rounded-2xl shadow hover:shadow-md transition p-6">
 
-                            <p class="text-sm text-gray-600">
-                                {{ $item->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
-                            </p>
-                        </div>
-                        <ul class="space-y-2 text-sm text-gray-600 mb-4">
-                            <li><strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}</li>
-                            <li><strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</li>
-                            <li><strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</li>
-                            <li><strong>Catatan:</strong> {{ $item->catatan ?? '-' }}</li>
-                        </ul>
+                    <div class="text-center mb-4">
+                        <h4 class="text-lg font-semibold text-gray-800">
+                            {{ $firstItem->jadwalProker->proker->judul ?? '-' }}
+                        </h4>
+
+                        <p class="text-sm text-gray-600">
+                            {{ $firstItem->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
+                        </p>
                     </div>
 
-                    {{-- Tampilkan Jumlah Foto --}}
-                    @if ($item->foto)
-                        @php $fotoCount = count(json_decode($item->foto, true)) @endphp
-                        <div class="mt-4 text-center">
-                            <button @click="openGallery = true; currentIndex = 0"
-                                class="text-green-600 underline font-semibold">
-                                {{ $fotoCount }} Foto
-                            </button>
-                        </div>
+                    <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
+                        @foreach ($group as $detail)
+                            @php
+                                $detailFotos = $detail->foto ? json_decode($detail->foto, true) : [];
+                                $detailFotoCount = count($detailFotos);
+                            @endphp
 
-                        {{-- Modal Gallery --}}
-                        <div x-cloak x-show="openGallery" x-transition.opacity
-                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-                            <div class="relative w-full max-w-3xl p-4">
-                                <button @click="openGallery = false"
-                                    class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
+                            <div class="p-3 bg-white border border-gray-200 rounded-lg" x-data="{
+                                openGallery: false,
+                                openUpload: false,
+                                currentIndex: 0,
+                                fotos: {{ json_encode($detailFotos) }}
+                            }">
+                                <p class="font-semibold text-gray-800 text-center">
+                                    {{ $detail->kegiatan ?? '-' }}
+                                </p>
 
-                                <div class="bg-white rounded-lg overflow-hidden">
-                                    <img :src="'{{ asset('storage') }}/' + fotos[currentIndex]"
-                                        class="w-full h-96 object-contain" alt="Foto Proker">
+                                <p class="text-xs text-gray-500 text-center">
+                                    {{ \Carbon\Carbon::parse($detail->tanggal_mulai)->format('d M Y') }}
+                                    -
+                                    {{ \Carbon\Carbon::parse($detail->tanggal_selesai)->format('d M Y') }}
+                                </p>
 
-                                    <div class="flex justify-between p-2 bg-gray-100">
-                                        <button @click="currentIndex = (currentIndex - 1 + fotos.length) % fotos.length"
-                                            class="px-4 py-2 bg-green-500 text-white rounded">Prev</button>
-                                        <button @click="currentIndex = (currentIndex + 1) % fotos.length"
-                                            class="px-4 py-2 bg-green-500 text-white rounded">Next</button>
+                                <p class="text-xs text-gray-500 mt-1 text-center">
+                                    {{ $detail->catatan ?? '-' }}
+                                </p>
+
+                                @if ($detailFotoCount > 0)
+                                    <div class="mt-1 text-center">
+                                        <button @click="openGallery = true; currentIndex = 0"
+                                            class="text-green-600 text-sm underline font-semibold">
+                                            Lihat {{ $detailFotoCount }} Foto
+                                        </button>
                                     </div>
+                                @endif
 
-                                    <div class="text-center py-2">
-                                        Foto <span x-text="currentIndex + 1"></span> dari {{ $fotoCount }}
+                                <div x-cloak x-show="openGallery" x-transition.opacity
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+
+                                    <div class="relative w-full max-w-3xl p-4">
+                                        <button @click="openGallery = false"
+                                            class="absolute top-2 right-2 text-white text-2xl font-bold">
+                                            &times;
+                                        </button>
+
+                                        <div class="bg-white rounded-lg overflow-hidden">
+
+                                            <div class="px-4 py-2 text-center font-semibold text-gray-700 border-b">
+                                                {{ $detail->kegiatan }}
+                                            </div>
+
+                                            <img :src="'{{ asset('storage') }}/' + fotos[currentIndex]"
+                                                class="w-full h-96 object-contain">
+
+                                            <div class="flex justify-between p-3 bg-gray-100">
+                                                <button
+                                                    @click="currentIndex = (currentIndex - 1 + fotos.length) % fotos.length"
+                                                    class="px-4 py-2 bg-green-600 text-white rounded">
+                                                    Prev
+                                                </button>
+
+                                                <button @click="currentIndex = (currentIndex + 1) % fotos.length"
+                                                    class="px-4 py-2 bg-green-600 text-white rounded">
+                                                    Next
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <div class="text-center">
+                                    <button @click="openUpload = true"
+                                        class="mt-2 text-sm bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded">
+                                        Upload Foto
+                                    </button>
+                                </div>
+
+                                <div x-cloak x-show="openUpload"
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+
+                                    <div class="bg-white p-6 rounded-xl w-full max-w-md" @click.away="openUpload = false">
+                                        <h3 class="text-lg font-semibold mb-4">Upload Foto</h3>
+
+                                        <form method="POST"
+                                            action="{{ route('proker-ranting.upload-foto', $detail->id) }}"
+                                            enctype="multipart/form-data">
+
+                                            @csrf
+                                            <input type="file" name="foto[]" multiple class="mb-4 w-full">
+
+                                            <div class="flex justify-end gap-2">
+                                                <button type="button" @click="openUpload = false"
+                                                    class="border px-4 py-2 rounded">
+                                                    Batal
+                                                </button>
+
+                                                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
+                                                    Upload
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
                             </div>
-                        </div>
-                    @endif
-
-                    {{-- Tombol Upload --}}
-                    <div class="mt-4 text-center">
-                        <button @click.prevent="openUpload = true"
-                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition">
-                            Upload Foto Kegiatan
-                        </button>
-                    </div>
-
-                    {{-- Modal Upload --}}
-                    <div x-cloak x-show="openUpload" x-transition.opacity
-                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                        <div @click.away="openUpload = false"
-                            class="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
-                            <h3 class="text-lg font-semibold mb-4">Upload Foto Kegiatan</h3>
-                            <form method="POST" action="{{ route('proker-ranting.upload-foto', $item->id) }}"
-                                enctype="multipart/form-data">
-                                @csrf
-                                <input type="file" name="foto[]" multiple required class="mb-4 w-full">
-                                <div class="flex justify-end gap-2">
-                                    <button type="button" @click="openUpload = false"
-                                        class="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100 transition">
-                                        Batal
-                                    </button>
-                                    <button type="submit"
-                                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                                        Upload
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                        @endforeach
                     </div>
 
                 </div>
+
             @empty
                 <div class="col-span-full text-center text-gray-400 py-10">
-                    Tidak ada Program kerja
+                    Tidak ada Program kerja yang sedang berjalan
                 </div>
             @endforelse
         </div>
 
-        {{-- PROGRAM SELESAI --}}
         <div class="text-center mt-12 mb-6">
             <h3 class="text-xl md:text-2xl font-semibold text-emerald-600 uppercase">
                 Program Kerja Sudah Selesai Dilaksanakan
@@ -172,73 +225,108 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @forelse ($selesai as $item)
-                <div class="bg-gray-100 rounded-2xl shadow hover:shadow-md transition p-6"
-                    x-data="{ 
-                        openGallery: false,
-                        currentIndex: 0,
-                        fotos: {{ $item->foto ? json_encode(json_decode($item->foto, true)) : '[]' }}
-                    }">
+            @forelse ($selesai as $prokerGroup)
+                @php
+                    $firstItem = $prokerGroup->first();
+                @endphp
+
+                <div class="bg-gray-100 rounded-2xl shadow hover:shadow-md transition p-6">
 
                     <div class="text-center mb-4">
                         <h4 class="text-lg font-semibold text-gray-800">
-                            {{ $item->jadwalProker->proker->judul ?? '-' }}
+                            {{ $firstItem->jadwalProker->proker->judul ?? '-' }}
                         </h4>
 
                         <p class="text-sm text-gray-600">
-                            {{ $item->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
+                            {{ $firstItem->jadwalProker->proker->ranting->kelurahan ?? 'MWC' }}
                         </p>
                     </div>
 
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><strong>Kegiatan:</strong> {{ $item->kegiatan ?? '-' }}</li>
-                        <li><strong>Mulai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d-m-Y') }}</li>
-                        <li><strong>Selesai:</strong> {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d-m-Y') }}</li>
-                        <li><strong>Catatan:</strong> {{ $item->catatan ?? '-' }}</li>
-                    </ul>
+                    <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
 
-                    {{-- Hanya tampilkan Foto TANPA upload --}}
-                    @if ($item->foto)
-                        @php $fotoCount = count(json_decode($item->foto, true)) @endphp
+                        @foreach ($prokerGroup as $detail)
+                            @php
+                                $detailFotos = $detail->foto ? json_decode($detail->foto, true) : [];
+                                $detailFotoCount = count($detailFotos);
+                            @endphp
 
-                        <div class="mt-4 text-center">
-                            <button @click="openGallery = true"
-                                class="text-green-600 underline font-semibold">
-                                Lihat {{ $fotoCount }} Foto
-                            </button>
-                        </div>
+                            <div class="p-3 bg-white border border-gray-200 rounded-lg" x-data="{
+                                openGallery: false,
+                                currentIndex: 0,
+                                fotos: {{ json_encode($detailFotos) }}
+                            }">
 
-                        {{-- Modal Gallery --}}
-                        <div x-cloak x-show="openGallery" x-transition.opacity
-                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-                            <div class="relative w-full max-w-3xl p-4">
-                                <button @click="openGallery = false"
-                                    class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
+                                <p class="font-semibold text-gray-800 text-center">
+                                    {{ $detail->kegiatan ?? '-' }}
+                                </p>
 
-                                <div class="bg-white rounded-lg overflow-hidden">
-                                    <img :src="'{{ asset('storage') }}/' + fotos[currentIndex]"
-                                        class="w-full h-96 object-contain" alt="Foto Proker">
+                                <p class="text-xs text-gray-500 text-center">
+                                    {{ \Carbon\Carbon::parse($detail->tanggal_mulai)->format('d M Y') }}
+                                    -
+                                    {{ \Carbon\Carbon::parse($detail->tanggal_selesai)->format('d M Y') }}
+                                </p>
 
-                                    <div class="flex justify-between p-2 bg-gray-100">
-                                        <button @click="currentIndex = (currentIndex - 1 + fotos.length) % fotos.length"
-                                            class="px-4 py-2 bg-green-500 text-white rounded">Prev</button>
-                                        <button @click="currentIndex = (currentIndex + 1) % fotos.length"
-                                            class="px-4 py-2 bg-green-500 text-white rounded">Next</button>
+                                @if ($detailFotoCount > 0)
+                                    <div class="mt-1 text-center">
+                                        <button @click="openGallery = true; currentIndex = 0"
+                                            class="text-green-600 text-sm underline font-semibold">
+                                            Lihat {{ $detailFotoCount }} Foto
+                                        </button>
                                     </div>
 
-                                    <div class="text-center py-2">
-                                        Foto <span x-text="currentIndex + 1"></span> dari {{ $fotoCount }}
+                                    <div x-cloak x-show="openGallery" x-transition.opacity
+                                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+
+                                        <div class="relative w-full max-w-3xl p-4">
+                                            <button @click="openGallery = false"
+                                                class="absolute top-2 right-2 text-white text-2xl font-bold">
+                                                &times;
+                                            </button>
+
+                                            <div class="bg-white rounded-lg overflow-hidden">
+
+                                                <div class="px-4 py-2 text-center font-semibold text-gray-700 border-b">
+                                                    {{ $detail->kegiatan }}
+                                                </div>
+
+                                                <img :src="'{{ asset('storage') }}/' + fotos[currentIndex]"
+                                                    class="w-full h-96 object-contain" alt="Foto Kegiatan">
+
+                                                <div class="flex justify-between p-3 bg-gray-100">
+                                                    <button
+                                                        @click="currentIndex = (currentIndex - 1 + fotos.length) % fotos.length"
+                                                        class="px-4 py-2 bg-green-500 text-white rounded">
+                                                        Prev
+                                                    </button>
+
+                                                    <button @click="currentIndex = (currentIndex + 1) % fotos.length"
+                                                        class="px-4 py-2 bg-green-500 text-white rounded">
+                                                        Next
+                                                    </button>
+                                                </div>
+
+                                                <div class="text-center py-2 text-sm text-gray-600">
+                                                    Foto <span x-text="currentIndex + 1"></span> dari
+                                                    {{ $detailFotoCount }}
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
-                                </div>
+                                @endif
+
                             </div>
-                        </div>
-                    @endif
+                        @endforeach
+                    </div>
+
                 </div>
+
             @empty
                 <div class="col-span-full text-center text-gray-400 py-10">
-                    Tidak ada Program kerja
+                    Tidak ada Program kerja yang sudah selesai
                 </div>
             @endforelse
         </div>
+
     </div>
 @endsection
