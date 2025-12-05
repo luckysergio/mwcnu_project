@@ -41,9 +41,9 @@
 
                                 <p class="mb-1">
                                     <strong>Proposal:</strong>
-                                    @if($item->proposal)
+                                    @if ($item->proposal)
                                         <a href="{{ asset('storage/' . $item->proposal) }}" target="_blank"
-                                           class="text-primary text-decoration-underline">
+                                            class="text-primary text-decoration-underline">
                                             Lihat PDF
                                         </a>
                                     @else
@@ -94,29 +94,27 @@
                                 {{-- MWC --}}
                                 @if ($jabatan === 'MWC')
                                     <a href="{{ route('proker-mwc.edit', $item->id) }}"
-                                       class="btn btn-success btn-sm w-100 rounded-3">
+                                        class="btn btn-success btn-sm w-100 rounded-3">
                                         Edit Proker
                                     </a>
                                 @endif
 
                                 {{-- RANTING --}}
                                 @if ($jabatan === 'Ranting')
-
                                     @if ($item->ranting_id === null)
                                         <button class="btn btn-success btn-sm w-100 rounded-3"
-                                                onclick="openEstimasi('{{ $item->id }}')">
+                                            onclick="openEstimasi('{{ $item->id }}')">
                                             Pilih Proker
                                         </button>
 
                                         <form id="formPilih{{ $item->id }}"
-                                              action="{{ route('proker-mwc.pilih', $item->id) }}"
-                                              method="POST"
-                                              style="display:none;">
+                                            action="{{ route('proker-mwc.pilih', $item->id) }}" method="POST"
+                                            style="display:none;">
                                             @csrf
                                             <input type="hidden" name="estimasi_mulai"
-                                                   id="estimasi_mulai_{{ $item->id }}">
+                                                id="estimasi_mulai_{{ $item->id }}">
                                             <input type="hidden" name="estimasi_selesai"
-                                                   id="estimasi_selesai_{{ $item->id }}">
+                                                id="estimasi_selesai_{{ $item->id }}">
                                         </form>
                                     @else
                                         @if ($item->ranting_id === $rantingUser)
@@ -129,7 +127,6 @@
                                             </button>
                                         @endif
                                     @endif
-
                                 @endif
 
                             </div>
@@ -156,39 +153,84 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function openEstimasi(id) {
+        async function openEstimasi(id) {
+
+            // Ambil tanggal yang sudah digunakan
+            const response = await fetch("{{ route('proker-mwc.disabled-dates') }}")
+            const disabledDates = await response.json()
+
             Swal.fire({
                 title: 'Estimasi Waktu Proker',
                 html: `
-                    <div class="text-start">
-                        <label class="mb-1 fw-bold">Estimasi Mulai</label>
-                        <input type="date" id="estimasi_mulai_input" class="form-control mb-2">
+            <div class="text-start">
+                <label class="mb-1 fw-bold">Estimasi Mulai</label>
+                <input type="date" id="estimasi_mulai_input" class="form-control mb-3">
 
-                        <label class="mb-1 fw-bold">Estimasi Selesai</label>
-                        <input type="date" id="estimasi_selesai_input" class="form-control">
-                    </div>
-                `,
-                focusConfirm: false,
+                <label class="mb-1 fw-bold">Estimasi Selesai</label>
+                <input type="date" id="estimasi_selesai_input" class="form-control">
+            </div>
+        `,
                 showCancelButton: true,
                 confirmButtonText: 'Pilih Proker',
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#dc3545',
+
+                didOpen: () => {
+                    const mulai = document.getElementById('estimasi_mulai_input')
+                    const selesai = document.getElementById('estimasi_selesai_input')
+
+                    function checkDisabled(input) {
+                        input.addEventListener('input', function() {
+                            if (disabledDates.includes(this.value)) {
+                                Swal.showValidationMessage(
+                                    "Tanggal ini sudah digunakan Proker lain")
+                                this.value = ""
+                            } else {
+                                Swal.resetValidationMessage()
+                            }
+                        })
+                    }
+
+                    checkDisabled(mulai)
+                    checkDisabled(selesai)
+                },
 
                 preConfirm: () => {
                     const mulai = document.getElementById('estimasi_mulai_input').value
                     const selesai = document.getElementById('estimasi_selesai_input').value
 
                     if (!mulai || !selesai) {
-                        Swal.showValidationMessage('Estimasi mulai & selesai harus diisi')
+                        Swal.showValidationMessage('Estimasi mulai & selesai wajib diisi')
                         return false
                     }
 
                     if (selesai < mulai) {
-                        Swal.showValidationMessage('Tanggal selesai tidak boleh lebih awal dari tanggal mulai')
+                        Swal.showValidationMessage(
+                            'Tanggal selesai tidak boleh lebih awal dari tanggal mulai')
                         return false
                     }
 
-                    return { mulai, selesai }
+                    // CEK RANGE (jika hari di tengah bentrok)
+                    const start = new Date(mulai)
+                    const end = new Date(selesai)
+                    const day = new Date(start)
+
+                    while (day <= end) {
+                        let check = day.toISOString().split('T')[0]
+
+                        if (disabledDates.includes(check)) {
+                            Swal.showValidationMessage(
+                                "Di antara rentang waktu terdapat tanggal yang sudah dipakai")
+                            return false
+                        }
+
+                        day.setDate(day.getDate() + 1)
+                    }
+
+                    return {
+                        mulai: mulai,
+                        selesai: selesai
+                    }
                 }
 
             }).then((result) => {
@@ -200,4 +242,5 @@
             })
         }
     </script>
+
 @endsection

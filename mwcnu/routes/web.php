@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataProkerController;
 use App\Http\Controllers\JabatanRantingController;
 use App\Http\Controllers\JadwalProkerController;
@@ -18,7 +19,7 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/register', [AuthController::class, 'registerView']);
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::get('/dashboard', [JadwalProkerController::class, 'semuaJadwal'])->name('jadwal.semua')->middleware('auth');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/anggota', [AnggotaController::class, 'index'])->middleware('auth');
 Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index')->middleware('auth');
 Route::get('/profile', [UserController::class, 'profile_view'])->name('profile.view')->middleware('auth');
@@ -109,6 +110,8 @@ Route::middleware(['auth', 'role:Admin,Tanfidiyah,Tanfidiyah ranting,Sekretaris'
         Route::post('/{id}/approve', [ProkerMwcController::class, 'approve'])->name('approve');
 
         Route::post('/{id}/pilih', [ProkerMwcController::class, 'pilih'])->name('pilih');
+        Route::get('/disabled-dates', [ProkerMwcController::class, 'disabledDates'])
+      ->name('disabled-dates');
     });
 
 });

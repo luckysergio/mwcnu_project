@@ -258,6 +258,19 @@ class ProkerMwcController extends Controller
             return back()->withErrors('Proker ini sudah dipilih oleh ranting lain.');
         }
 
+        $bentrok = JadwalProker::where(function ($query) use ($request) {
+            $query->whereBetween('estimasi_mulai', [$request->estimasi_mulai, $request->estimasi_selesai])
+                ->orWhereBetween('estimasi_selesai', [$request->estimasi_mulai, $request->estimasi_selesai])
+                ->orWhere(function ($q) use ($request) {
+                    $q->where('estimasi_mulai', '<=', $request->estimasi_mulai)
+                        ->where('estimasi_selesai', '>=', $request->estimasi_selesai);
+                });
+        })->exists();
+
+        if ($bentrok) {
+            return back()->withErrors('Tanggal tersebut sudah digunakan proker lain.');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -279,9 +292,30 @@ class ProkerMwcController extends Controller
 
             return back()->with('success', 'Proker berhasil dipilih dan estimasi jadwal disimpan.');
         } catch (\Exception $e) {
+
             DB::rollBack();
 
             return back()->withErrors('Terjadi kesalahan saat memilih proker.');
         }
+    }
+
+    public function disabledDates()
+    {
+        $dates = JadwalProker::select('estimasi_mulai', 'estimasi_selesai')->get();
+
+        $disabled = [];
+
+        foreach ($dates as $item) {
+
+            $start = \Carbon\Carbon::parse($item->estimasi_mulai);
+            $end   = \Carbon\Carbon::parse($item->estimasi_selesai);
+
+            while ($start <= $end) {
+                $disabled[] = $start->format('Y-m-d');
+                $start->addDay();
+            }
+        }
+
+        return response()->json($disabled);
     }
 }
