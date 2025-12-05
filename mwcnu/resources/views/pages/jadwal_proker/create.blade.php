@@ -38,6 +38,7 @@
         <form action="{{ route('jadwal-proker.store') }}" method="POST" class="space-y-5">
             @csrf
 
+            {{-- PILIH PROKER --}}
             <div>
                 <label for="proker_id" class="block text-sm font-medium text-gray-700 mb-1">Pilih Program Kerja</label>
                 <select name="proker_id" id="proker_id"
@@ -49,6 +50,24 @@
                 </select>
             </div>
 
+            {{-- ESTIMASI WAKTU --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="estimasi_mulai" class="block text-sm font-medium text-gray-700 mb-1">Estimasi Mulai</label>
+                    <input type="date" name="estimasi_mulai" id="estimasi_mulai"
+                        class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500" 
+                        required>
+                </div>
+
+                <div>
+                    <label for="estimasi_selesai" class="block text-sm font-medium text-gray-700 mb-1">Estimasi Selesai</label>
+                    <input type="date" name="estimasi_selesai" id="estimasi_selesai"
+                        class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500" 
+                        required>
+                </div>
+            </div>
+
+            {{-- STATUS --}}
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status Jadwal</label>
                 <select name="status" id="status"

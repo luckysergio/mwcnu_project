@@ -71,7 +71,6 @@ class JadwalProkerController extends Controller
         $anggotaStatus = $user->anggota->status->status ?? null;
         $rantingId = $user->anggota->ranting_id;
 
-        // Filter proker sesuai ranting jika bukan MWC
         $prokers = Proker::where('status', 'disetujui')
             ->doesntHave('jadwalProker')
             ->when($anggotaStatus !== 'MWC', function ($q) use ($rantingId) {
@@ -86,6 +85,8 @@ class JadwalProkerController extends Controller
     {
         $request->validate([
             'proker_id' => 'required|exists:prokers,id',
+            'estimasi_mulai' => 'required|date',
+            'estimasi_selesai' => 'required|date|after_or_equal:estimasi_mulai',
             'status' => 'required|in:penjadwalan,berjalan,selesai',
             'kegiatan' => 'required|array',
             'kegiatan.*' => 'required|string',
@@ -111,6 +112,8 @@ class JadwalProkerController extends Controller
             $jadwal = JadwalProker::create([
                 'proker_id' => $request->proker_id,
                 'penanggung_jawab_id' => $proker->anggota_id,
+                'estimasi_mulai' => $request->estimasi_mulai,
+                'estimasi_selesai' => $request->estimasi_selesai,
                 'status' => $request->status,
             ]);
 
@@ -155,6 +158,8 @@ class JadwalProkerController extends Controller
     {
         $request->validate([
             'proker_id' => 'required|exists:prokers,id',
+            'estimasi_mulai'   => 'nullable|date',
+            'estimasi_selesai' => 'nullable|date|after_or_equal:estimasi_mulai',
             'status' => 'required|in:penjadwalan,berjalan,selesai',
 
             'kegiatan' => 'required|array|min:1',
@@ -191,20 +196,10 @@ class JadwalProkerController extends Controller
             $jadwal->update([
                 'proker_id' => $request->proker_id,
                 'penanggung_jawab_id' => $proker->anggota_id,
+                'estimasi_mulai' => $request->estimasi_mulai,
+                'estimasi_selesai' => $request->estimasi_selesai,
                 'status' => $request->status,
             ]);
-
-            /**
-             * Dua alur:
-             * 1) Jika form mengirim detail_id[] => lakukan update per-row berdasarkan id.
-             *    - Hapus detail yang tidak dikirim
-             *    - Update detail yang ada (foto dipertahankan karena tidak diubah di sini)
-             *    - Buat detail baru bila ada (detail_id null atau kosong)
-             *
-             * 2) Jika form TIDAK mengirim detail_id[] => fallback: simpan foto lama berdasarkan index
-             *    (backup foto dari old details per urutan), hapus semuanya lalu recreate,
-             *    dan restore foto dari backup berdasarkan index jika ada.
-             */
 
             $inputDetailIds = $request->input('detail_id', null);
 

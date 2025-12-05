@@ -27,9 +27,18 @@
                     <tbody class="divide-y divide-gray-200">
                         @foreach ($data as $i => $item)
                             @php
-                                $lockedNames = $type === 'jabatan'
-                                    ? ['Admin', 'Tanfidiyah', 'Tanfidiyah ranting', 'Sekretaris']
-                                    : ['karang tengah', 'karang mulya', 'karang timur', 'pedurenan', 'pondok bahar', 'pondok pucung', 'parung jaya'];
+                                $lockedNames =
+                                    $type === 'jabatan'
+                                        ? ['Admin', 'Tanfidiyah', 'Tanfidiyah ranting', 'Sekretaris']
+                                        : [
+                                            'karang tengah',
+                                            'karang mulya',
+                                            'karang timur',
+                                            'pedurenan',
+                                            'pondok bahar',
+                                            'pondok pucung',
+                                            'parung jaya',
+                                        ];
                                 $nama = $type === 'jabatan' ? $item->jabatan : $item->kelurahan;
                             @endphp
                             <tr>

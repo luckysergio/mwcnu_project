@@ -18,15 +18,24 @@ class ProkerMwcController extends Controller
 {
     public function index()
     {
-        $anggota = Auth::user()->anggota;
-        $status  = $anggota->status->status ?? null;
+        $anggota   = Auth::user()->anggota;
+        $status    = $anggota->status->status ?? null;
         $rantingId = $anggota->ranting_id ?? null;
 
-        // Ambil semua Proker MWC
-        $prokers = Proker::with(['bidang', 'jenis', 'tujuan', 'sasaran', 'ranting'])
-            ->whereHas('anggota.status', fn($s) => $s->where('status', 'MWC'))
+        $prokers = Proker::with([
+            'bidang',
+            'jenis',
+            'tujuan',
+            'sasaran',
+            'ranting',
+            'anggota',
+            'jadwalProker'
+        ])
+            ->whereHas('anggota.status', function ($s) {
+                $s->where('status', 'MWC');
+            })
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10); // ✅ Pagination 10 data per halaman
 
         return view('pages.prokermwc.index', compact('prokers', 'status', 'rantingId'));
     }
@@ -59,10 +68,9 @@ class ProkerMwcController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'keterangan' => 'nullable|string',
-            'proposal' => 'required|file|mimes:pdf|max:5120', // 5MB PDF only
+            'proposal' => 'required|file|mimes:pdf|max:5120',
         ]);
 
-        // Bidang
         if ($request->bidang_id === 'add_new') {
             $request->validate(['new_bidang' => 'required|string|max:50']);
             $bidang_id = Bidang::create(['nama' => $request->new_bidang])->id;
@@ -71,7 +79,6 @@ class ProkerMwcController extends Controller
             $bidang_id = $request->bidang_id;
         }
 
-        // Jenis
         if ($request->jenis_id === 'add_new') {
             $request->validate(['new_jenis' => 'required|string|max:50']);
             $jenis_id = JenisKegiatan::create(['nama' => $request->new_jenis])->id;
@@ -80,7 +87,6 @@ class ProkerMwcController extends Controller
             $jenis_id = $request->jenis_id;
         }
 
-        // Tujuan
         if ($request->tujuan_id === 'add_new') {
             $request->validate(['new_tujuan' => 'required|string|max:50']);
             $tujuan_id = Tujuan::create(['nama' => $request->new_tujuan])->id;
@@ -89,7 +95,6 @@ class ProkerMwcController extends Controller
             $tujuan_id = $request->tujuan_id;
         }
 
-        // Sasaran
         if ($request->sasaran_id === 'add_new') {
             $request->validate(['new_sasaran' => 'required|string|max:50']);
             $sasaran_id = Sasaran::create(['nama' => $request->new_sasaran])->id;
@@ -98,7 +103,6 @@ class ProkerMwcController extends Controller
             $sasaran_id = $request->sasaran_id;
         }
 
-        // Upload Proposal
         $proposalName = time() . '_' . $request->file('proposal')->getClientOriginalName();
         $proposalPath = $request->file('proposal')->storeAs('proposal-proker', $proposalName, 'public');
 

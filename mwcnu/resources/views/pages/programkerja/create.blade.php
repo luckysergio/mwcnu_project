@@ -39,14 +39,15 @@
             <form action="{{ route('proker.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 @csrf
 
+                {{-- JUDUL --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">
                         Judul Program Kerja
                     </label>
                     <input type="text" name="judul" value="{{ old('judul') }}"
                         class="w-full px-4 py-2 border rounded-lg shadow-sm
-                              focus:ring-green-500 focus:border-green-500
-                              @error('judul') border-red-500 @enderror">
+                        focus:ring-green-500 focus:border-green-500
+                        @error('judul') border-red-500 @enderror">
 
                     @error('judul')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -54,6 +55,7 @@
                 </div>
 
 
+                {{-- BIDANG, JENIS, TUJUAN, SASARAN --}}
                 @foreach ([['bidang_id', 'Bidang', $bidangs, 'new_bidang'], ['jenis_id', 'Jenis Kegiatan', $jenisKegiatans, 'new_jenis'], ['tujuan_id', 'Tujuan', $tujuans, 'new_tujuan'], ['sasaran_id', 'Sasaran', $sasarans, 'new_sasaran']] as [$field, $label, $list, $newField])
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -81,8 +83,8 @@
                         <input type="text" name="{{ $newField }}" id="{{ $newField }}"
                             placeholder="Masukkan {{ $label }} Baru" value="{{ old($newField) }}"
                             class="w-full px-4 py-2 border rounded-lg shadow-sm mt-2
-                              focus:ring-green-500 focus:border-green-500
-                              {{ old($field) == 'add_new' ? '' : 'hidden' }}">
+                                  focus:ring-green-500 focus:border-green-500
+                                  {{ old($field) == 'add_new' ? '' : 'hidden' }}">
 
                         @error($field)
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -91,13 +93,56 @@
                 @endforeach
 
 
+                {{-- ESTIMASI WAKTU --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Estimasi Mulai
+                        </label>
+                        <input
+                            type="date"
+                            name="estimasi_mulai"
+                            value="{{ old('estimasi_mulai') }}"
+                            class="w-full px-4 py-2 border rounded-lg shadow-sm
+                            focus:ring-green-500 focus:border-green-500
+                            @error('estimasi_mulai') border-red-500 @enderror"
+                        >
+
+                        @error('estimasi_mulai')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Estimasi Selesai
+                        </label>
+                        <input
+                            type="date"
+                            name="estimasi_selesai"
+                            value="{{ old('estimasi_selesai') }}"
+                            class="w-full px-4 py-2 border rounded-lg shadow-sm
+                            focus:ring-green-500 focus:border-green-500
+                            @error('estimasi_selesai') border-red-500 @enderror"
+                        >
+
+                        @error('estimasi_selesai')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                </div>
+
+
+                {{-- PROPOSAL --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Upload Proposal (PDF)
                     </label>
                     <input type="file" name="proposal" accept="application/pdf"
                         class="w-full px-4 py-2 border rounded-lg shadow-sm
-                              @error('proposal') border-red-500 @enderror">
+                        @error('proposal') border-red-500 @enderror">
 
                     @error('proposal')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -105,14 +150,15 @@
                 </div>
 
 
+                {{-- KETERANGAN --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Keterangan Tambahan
                     </label>
                     <textarea name="keterangan" rows="4"
                         class="w-full px-4 py-2 border rounded-lg shadow-sm resize-y
-                                 focus:ring-green-500 focus:border-green-500
-                                 @error('keterangan') border-red-500 @enderror">{{ old('keterangan') }}</textarea>
+                        focus:ring-green-500 focus:border-green-500
+                        @error('keterangan') border-red-500 @enderror">{{ old('keterangan') }}</textarea>
 
                     @error('keterangan')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -120,13 +166,14 @@
                 </div>
 
 
-                <div class="flex justify-center">
+                {{-- BUTTON --}}
+                <div class="flex justify-center pt-3">
                     <button type="submit"
                         class="inline-flex items-center gap-2 px-6 py-2
-                           bg-gradient-to-r from-green-500 to-green-600
-                           text-white text-sm font-semibold rounded-lg shadow
-                           hover:from-green-600 hover:to-green-700
-                           focus:outline-none focus:ring-2 focus:ring-green-300">
+                        bg-gradient-to-r from-green-500 to-green-600
+                        text-white text-sm font-semibold rounded-lg shadow
+                        hover:from-green-600 hover:to-green-700
+                        focus:outline-none focus:ring-2 focus:ring-green-300">
                         <i class="fas fa-paper-plane text-sm"></i>
                         Ajukan
                     </button>
@@ -136,29 +183,16 @@
     </div>
 
 
+    {{-- Script untuk tambah data baru --}}
     <script>
-        const controls = [{
-                selectId: 'bidang_id',
-                inputId: 'new_bidang'
-            },
-            {
-                selectId: 'jenis_id',
-                inputId: 'new_jenis'
-            },
-            {
-                selectId: 'tujuan_id',
-                inputId: 'new_tujuan'
-            },
-            {
-                selectId: 'sasaran_id',
-                inputId: 'new_sasaran'
-            },
+        const controls = [
+            { selectId: 'bidang_id', inputId: 'new_bidang' },
+            { selectId: 'jenis_id', inputId: 'new_jenis' },
+            { selectId: 'tujuan_id', inputId: 'new_tujuan' },
+            { selectId: 'sasaran_id', inputId: 'new_sasaran' },
         ];
 
-        controls.forEach(({
-            selectId,
-            inputId
-        }) => {
+        controls.forEach(({ selectId, inputId }) => {
             const selectEl = document.getElementById(selectId);
             const inputEl = document.getElementById(inputId);
 
@@ -166,5 +200,17 @@
                 inputEl.classList.toggle('hidden', selectEl.value !== 'add_new');
             });
         });
+
+        const start = document.querySelector('input[name="estimasi_mulai"]');
+        const end   = document.querySelector('input[name="estimasi_selesai"]');
+
+        if(start && end){
+            start.addEventListener('change', () => {
+                end.min = start.value;
+                if(end.value < start.value){
+                    end.value = start.value;
+                }
+            });
+        }
     </script>
 @endsection

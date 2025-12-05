@@ -5,6 +5,7 @@
 
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h1 class="text-3xl font-bold text-gray-900">Jadwal Program Kerja</h1>
+
         <a href="{{ route('jadwal-proker.create') }}"
             class="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm rounded-xl shadow-lg transition-all duration-200">
             <i class="fas fa-plus text-sm"></i>
@@ -18,6 +19,7 @@
         </a>
     </div>
 
+    {{-- FILTER STATUS --}}
     <form method="GET" class="flex justify-center mb-8">
         <div class="relative w-full max-w-xs">
             <select name="status" onchange="this.form.submit()"
@@ -33,6 +35,7 @@
         </div>
     </form>
 
+    {{-- ALERT SUCCESS --}}
     @if (session('success'))
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
         <script>
@@ -45,24 +48,66 @@
         </script>
     @endif
 
+    {{-- LIST CARD --}}
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
         @forelse ($jadwals as $item)
+
+            @php
+                $estimasiMulai   = $item->estimasi_mulai ? \Carbon\Carbon::parse($item->estimasi_mulai) : null;
+                $estimasiSelesai = $item->estimasi_selesai ? \Carbon\Carbon::parse($item->estimasi_selesai) : null;
+
+                $durasi = ($estimasiMulai && $estimasiSelesai)
+                    ? $estimasiMulai->diffInDays($estimasiSelesai) + 1
+                    : null;
+            @endphp
+
             <div
                 class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg p-6 flex flex-col justify-between">
-                <div class="space-y-3">
-                    <div class="flex items-start justify-between">
-                        <h2 class="text-lg font-bold text-gray-900 leading-snug">{{ $item->proker->judul }}</h2>
-                        <span
-                            class="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full
-                        {{ $item->status == 'penjadwalan' ? 'bg-yellow-500' : ($item->status == 'berjalan' ? 'bg-blue-600' : 'bg-green-600') }}">
-                            {{ ucfirst($item->status) }}
-                        </span>
-                    </div>
 
-                    <p class="text-sm text-gray-600">Penanggung Jawab:
-                        <strong class="text-gray-800">{{ $item->penanggungJawab->name ?? '-' }}</strong>
+                <div class="space-y-4">
+
+                    {{-- HEADER --}}
+                    <div class="flex flex-col items-center text-center space-y-2">
+    <h2 class="text-lg font-bold text-gray-900 leading-snug">
+        {{ $item->proker->judul }}
+    </h2>
+
+    <span
+        class="inline-block px-4 py-1 text-xs font-semibold text-white rounded-full
+        {{ $item->status == 'penjadwalan' ? 'bg-yellow-500' : ($item->status == 'berjalan' ? 'bg-blue-600' : 'bg-green-600') }}">
+        {{ ucfirst($item->status) }}
+    </span>
+</div>
+
+                    {{-- PENANGGUNG JAWAB --}}
+                    <p class="text-sm text-gray-600">
+                        Penanggung Jawab:
+                        <strong class="text-gray-800">
+                            {{ $item->penanggungJawab->name ?? '-' }}
+                        </strong>
                     </p>
 
+                    {{-- ESTIMASI --}}
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                        <p class="text-sm text-gray-700">
+                            <strong>Estimasi Mulai:</strong>
+                            {{ $estimasiMulai ? $estimasiMulai->translatedFormat('d M Y') : '-' }}
+                        </p>
+
+                        <p class="text-sm text-gray-700">
+                            <strong>Estimasi Selesai:</strong>
+                            {{ $estimasiSelesai ? $estimasiSelesai->translatedFormat('d M Y') : '-' }}
+                        </p>
+
+                        @if($durasi)
+                            <p class="text-sm text-gray-800 font-semibold mt-1">
+                                Durasi: {{ $durasi }} hari
+                            </p>
+                        @endif
+                    </div>
+
+                    {{-- DETAIL KEGIATAN --}}
                     <div class="text-sm text-gray-700 space-y-3">
                         @foreach ($item->details as $detail)
                             <div class="mb-2">
@@ -76,32 +121,34 @@
                             </div>
                         @endforeach
                     </div>
+
                 </div>
 
+                {{-- BUTTON --}}
                 <div class="mt-5 flex flex-col gap-3">
                     <a href="{{ route('jadwal-proker.edit', $item->id) }}"
                         class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold text-sm rounded-lg shadow transition">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <form action="{{ route('jadwal-proker.destroy', $item->id) }}" method="POST"
-                        onsubmit="return confirm('Yakin ingin menghapus jadwal ini?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="button"
-                            onclick="confirmDeleteJadwal({{ $item->id }}, '{{ $item->jadwalProker->proker->judul ?? 'Program' }}')"
-                            class="w-full inline-flex items-center justify-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg shadow transition">
-                            <i class="fas fa-trash-alt"></i> Hapus
-                        </button>
-                    </form>
+
+                    <button type="button"
+                        onclick="confirmDeleteJadwal({{ $item->id }}, '{{ $item->proker->judul }}')"
+                        class="w-full inline-flex items-center justify-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg shadow transition">
+                        <i class="fas fa-trash-alt"></i> Hapus
+                    </button>
                 </div>
+
             </div>
+
         @empty
             <div class="col-span-full text-center text-gray-400 italic">
                 Tidak ada data jadwal program kerja.
             </div>
         @endforelse
+
     </div>
 
+    {{-- DELETE CONFIRM --}}
     <script>
         function confirmDeleteJadwal(id, judul) {
             Swal.fire({
@@ -131,6 +178,7 @@
 
                     form.appendChild(csrf);
                     form.appendChild(method);
+
                     document.body.appendChild(form);
                     form.submit();
                 }

@@ -33,10 +33,33 @@
                 </select>
             </div>
 
+            {{-- ✅ ESTIMASI --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block mb-1 font-medium text-gray-700">Estimasi Mulai</label>
+                    <input type="date" name="estimasi_mulai"
+                        value="{{ old('estimasi_mulai', $jadwal->estimasi_mulai) }}"
+                        class="w-full border px-4 py-2 rounded">
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-medium text-gray-700">Estimasi Selesai</label>
+                    <input type="date" name="estimasi_selesai"
+                        value="{{ old('estimasi_selesai', $jadwal->estimasi_selesai) }}"
+                        class="w-full border px-4 py-2 rounded">
+                </div>
+            </div>
+
+            <hr class="my-4">
+
             {{-- === Detail Kegiatan === --}}
             <div id="kegiatan-container">
                 @foreach ($jadwal->details as $i => $detail)
                     <div class="bg-gray-100 p-4 mb-4 rounded-md kegiatan-item">
+
+                        {{-- id detail (hidden) --}}
+                        <input type="hidden" name="detail_id[]" value="{{ $detail->id }}">
+
                         <label class="block font-semibold">Kegiatan</label>
                         <input type="text" name="kegiatan[]" value="{{ $detail->kegiatan }}"
                             class="w-full border px-4 py-2 rounded mb-2" required>
@@ -50,7 +73,8 @@
                             class="w-full border px-4 py-2 rounded mb-2" required>
 
                         <label class="block font-semibold">Catatan</label>
-                        <textarea name="catatan[]" rows="2" class="w-full border px-4 py-2 rounded">{{ $detail->catatan }}</textarea>
+                        <textarea name="catatan[]" rows="2"
+                            class="w-full border px-4 py-2 rounded">{{ $detail->catatan }}</textarea>
 
                         <button type="button" onclick="this.closest('.kegiatan-item').remove();"
                             class="mt-2 text-sm text-red-500 hover:underline">Hapus Kegiatan</button>
@@ -71,9 +95,10 @@
         </form>
     </div>
 
-    {{-- Template Kegiatan --}}
     <template id="kegiatan-template">
         <div class="bg-gray-100 p-4 mb-4 rounded-md kegiatan-item">
+            <input type="hidden" name="detail_id[]" value="">
+
             <label class="block font-semibold">Kegiatan</label>
             <input type="text" name="kegiatan[]" class="w-full border px-4 py-2 rounded mb-2" required>
 

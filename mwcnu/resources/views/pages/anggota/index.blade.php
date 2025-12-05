@@ -43,7 +43,6 @@
         </script>
     @endif
 
-
     <form method="GET" class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
 
         <select name="status" id="filterStatus" onchange="toggleRantingDropdown(); this.form.submit()"
@@ -69,7 +68,6 @@
         </select>
 
     </form>
-
 
     <div class="bg-white shadow-md rounded-xl overflow-hidden mb-10">
         <div class="overflow-x-auto">

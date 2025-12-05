@@ -12,6 +12,7 @@
         </a>
     </div>
 
+    {{-- Filter --}}
     <form method="GET" class="flex justify-center mb-8">
         <div class="relative w-full max-w-xs">
             <select name="status" onchange="this.form.submit()"
@@ -27,6 +28,7 @@
         </div>
     </form>
 
+    {{-- Alert --}}
     @if (session('success'))
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
         <script>
@@ -39,35 +41,76 @@
         </script>
     @endif
 
+    {{-- DATA --}}
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         @forelse ($prokers as $item)
+            @php
+                $statusPengaju = $item->anggota->status->status ?? null;
+            @endphp
+
             <div
                 class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg p-6 flex flex-col justify-between">
                 <div class="space-y-3">
-                    <div class="flex items-start justify-between">
-                        <h2 class="text-lg font-bold text-gray-900 leading-snug">{{ $item->judul }}</h2>
+                    <div class="flex flex-col items-center text-center gap-2 mb-4">
+                        <h2 class="text-lg font-bold text-gray-900 leading-snug">
+                            {{ $item->judul }}
+                        </h2>
+
                         <span
-                            class="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full
-                        {{ $item->status == 'pengajuan' ? 'bg-yellow-500' : ($item->status == 'disetujui' ? 'bg-green-600' : 'bg-red-600') }}">
+                            class="inline-block px-4 py-1 text-xs font-semibold text-white rounded-full
+        {{ $item->status == 'pengajuan' ? 'bg-yellow-500' : ($item->status == 'disetujui' ? 'bg-green-600' : 'bg-red-600') }}">
                             {{ ucfirst($item->status) }}
                         </span>
                     </div>
 
-                    <p class="text-sm text-gray-600">Diajukan oleh: <strong
-                            class="text-gray-800">{{ $item->anggota->name }}</strong></p>
+                    <p class="text-sm text-gray-600">
+                        Diajukan oleh:
+                        <strong class="text-gray-800">
+                            <strong></strong> {{ $item->anggota->name ?? '-' }}
 
+                        </strong>
+                    </p>
+
+                    {{-- INFO DETAIL --}}
                     <div class="text-sm text-gray-700 space-y-1">
                         <p><strong>Ranting:</strong> {{ $item->ranting->kelurahan ?? '-' }}</p>
-                        <p><strong>Bidang:</strong> {{ $item->bidang->nama }}</p>
-                        <p><strong>Jenis Kegiatan:</strong> {{ $item->jenis->nama }}</p>
-                        <p><strong>Tujuan:</strong> {{ $item->tujuan->nama }}</p>
-                        <p><strong>Sasaran:</strong> {{ $item->sasaran->nama }}</p>
-                        <p><strong>Proposal:</strong> <a href="{{ asset('storage/' . $item->proposal) }}" target="_blank"
-                                class="text-blue-600 hover:underline">Lihat</a></p>
-                        <p><strong>Keterangan:</strong> {{ $item->keterangan ?? '-' }}</p>
+                        <p><strong>Bidang:</strong> {{ $item->bidang->nama ?? '-' }}</p>
+                        <p><strong>Jenis Kegiatan:</strong> {{ $item->jenis->nama ?? '-' }}</p>
+                        <p><strong>Tujuan:</strong> {{ $item->tujuan->nama ?? '-' }}</p>
+                        <p><strong>Sasaran:</strong> {{ $item->sasaran->nama ?? '-' }}</p>
+
+                        <p>
+                            <strong>Proposal:</strong>
+                            @if ($item->proposal)
+                                <a href="{{ asset('storage/' . $item->proposal) }}" target="_blank"
+                                    class="text-blue-600 hover:underline">
+                                    Lihat
+                                </a>
+                            @else
+                                -
+                            @endif
+                        </p>
+
+                        <p>
+                            <strong>Jenis Program:</strong>
+                            @if ($statusPengaju === 'MWC')
+                                <span class="text-purple-600 font-semibold">Program Kerja MWC</span>
+                            @elseif ($statusPengaju === 'Ranting')
+                                <span class="text-indigo-600 font-semibold">Program Kerja Ranting</span>
+                            @else
+                                <span class="text-gray-500">-</span>
+                            @endif
+                        </p>
+
+                        @if ($item->keterangan)
+                            <p class="text-xs text-gray-400 italic">
+                                Catatan: {{ $item->keterangan }}
+                            </p>
+                        @endif
                     </div>
                 </div>
 
+                {{-- BUTTON ADMIN/MWC --}}
                 @auth
                     @php
                         $anggota = auth()->user()->anggota;
@@ -98,6 +141,14 @@
         @endforelse
     </div>
 
+    {{-- PAGINATION --}}
+    @if ($prokers instanceof \Illuminate\Pagination\LengthAwarePaginator)
+        <div class="mt-10">
+            {{ $prokers->onEachSide(1)->links('pagination::tailwind') }}
+        </div>
+    @endif
+
+    {{-- SCRIPT DELETE --}}
     <script>
         function confirmDelete(id, judul) {
             Swal.fire({
