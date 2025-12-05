@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\JadwalProker;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 
 class ProkerMwcController extends Controller
@@ -300,22 +301,24 @@ class ProkerMwcController extends Controller
     }
 
     public function disabledDates()
-    {
-        $dates = JadwalProker::select('estimasi_mulai', 'estimasi_selesai')->get();
+{
+    $dates = JadwalProker::join('prokers', 'jadwal_prokers.proker_id', '=', 'prokers.id')
+        ->where('prokers.status', 'disetujui')
+        ->select('jadwal_prokers.estimasi_mulai', 'jadwal_prokers.estimasi_selesai')
+        ->get();
 
-        $disabled = [];
+    $disabled = collect();
 
-        foreach ($dates as $item) {
+    foreach ($dates as $item) {
+        $start = Carbon::parse($item->estimasi_mulai);
+        $end   = Carbon::parse($item->estimasi_selesai);
 
-            $start = \Carbon\Carbon::parse($item->estimasi_mulai);
-            $end   = \Carbon\Carbon::parse($item->estimasi_selesai);
-
-            while ($start <= $end) {
-                $disabled[] = $start->format('Y-m-d');
-                $start->addDay();
-            }
+        while ($start <= $end) {
+            $disabled->push($start->format('Y-m-d'));
+            $start->addDay();
         }
-
-        return response()->json($disabled);
     }
+
+    return response()->json($disabled->unique()->values());
+}
 }

@@ -155,7 +155,6 @@
     <script>
         async function openEstimasi(id) {
 
-            // Ambil tanggal yang sudah digunakan
             const response = await fetch("{{ route('proker-mwc.disabled-dates') }}")
             const disabledDates = await response.json()
 

@@ -112,6 +112,8 @@ Route::middleware(['auth', 'role:Admin,Tanfidiyah,Tanfidiyah ranting,Sekretaris'
         Route::post('/{id}/pilih', [ProkerMwcController::class, 'pilih'])->name('pilih');
         Route::get('/disabled-dates', [ProkerMwcController::class, 'disabledDates'])
       ->name('disabled-dates');
+        Route::get('/dashboard/ranting', [DashboardController::class, 'rantingCard']);
+
     });
 
 });
