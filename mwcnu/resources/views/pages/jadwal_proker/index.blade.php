@@ -77,10 +77,10 @@
                         </span>
                     </div>
 
-                    {{-- PENANGGUNG JAWAB --}}
+                    {{-- RANTING PROKER --}}
                     <p class="text-sm text-gray-600 text-center">
                         <strong class="text-gray-800">
-                            {{ $item->penanggungJawab->name ?? '-' }}
+                            {{ $item->proker->ranting->kelurahan ?? '-' }}
                         </strong>
                     </p>
 
