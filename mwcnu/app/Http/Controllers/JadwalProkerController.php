@@ -27,6 +27,22 @@ class JadwalProkerController extends Controller
         return response()->json(['count' => $count]);
     }
 
+    private function isBentrok($mulai, $selesai, $exceptJadwalId = null)
+    {
+        return JadwalProker::where(function ($q) use ($mulai, $selesai) {
+            $q->whereBetween('estimasi_mulai', [$mulai, $selesai])
+                ->orWhereBetween('estimasi_selesai', [$mulai, $selesai])
+                ->orWhere(function ($q2) use ($mulai, $selesai) {
+                    $q2->where('estimasi_mulai', '<=', $mulai)
+                        ->where('estimasi_selesai', '>=', $selesai);
+                });
+        })
+            ->when($exceptJadwalId, function ($q) use ($exceptJadwalId) {
+                $q->where('id', '!=', $exceptJadwalId);
+            })
+            ->exists();
+    }
+
     public function index(Request $request)
     {
         /** @var \App\Models\User $user */
@@ -84,51 +100,64 @@ class JadwalProkerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'proker_id' => 'required|exists:prokers,id',
-            'estimasi_mulai' => 'required|date',
-            'estimasi_selesai' => 'required|date|after_or_equal:estimasi_mulai',
-            'status' => 'required|in:penjadwalan,berjalan,selesai',
-            'kegiatan' => 'required|array',
-            'kegiatan.*' => 'required|string',
-            'tanggal_mulai' => 'required|array',
-            'tanggal_mulai.*' => 'required|date',
-            'tanggal_selesai' => 'required|array',
-            'tanggal_selesai.*' => 'required|date|after_or_equal:tanggal_mulai.*',
+            'proker_id'         => 'required|exists:prokers,id',
+            'estimasi_mulai'    => 'required|date',
+            'estimasi_selesai'  => 'required|date|after_or_equal:estimasi_mulai',
+            'status'             => 'required|in:penjadwalan,berjalan,selesai',
+
+            'kegiatan'           => 'required|array',
+            'kegiatan.*'         => 'required|string',
+
+            'tanggal_mulai'      => 'required|array',
+            'tanggal_mulai.*'    => 'required|date',
+
+            'tanggal_selesai'    => 'required|array',
+            'tanggal_selesai.*'  => 'required|date|after_or_equal:tanggal_mulai.*',
+
             'catatan' => 'nullable|array'
         ]);
 
-        $user = Auth::user();
+        $user          = Auth::user();
         $anggotaStatus = $user->anggota->status->status ?? null;
-        $rantingId = $user->anggota->ranting_id;
+        $rantingId     = $user->anggota->ranting_id;
 
         $proker = Proker::findOrFail($request->proker_id);
 
-        // Pastikan user ranting tidak bisa membuat jadwal untuk ranting lain
         if ($anggotaStatus !== 'MWC' && $proker->ranting_id != $rantingId) {
             abort(403, "Anda tidak dapat membuat jadwal untuk proker ranting lain.");
         }
 
+        // ✅ CEK BENTROK
+        $bentrok = $this->isBentrok($request->estimasi_mulai, $request->estimasi_selesai);
+
+        if ($bentrok) {
+            return back()->withErrors('Tanggal jadwal ini bentrok dengan proker lain.')
+                ->withInput();
+        }
+
         DB::transaction(function () use ($request, $proker) {
+
             $jadwal = JadwalProker::create([
-                'proker_id' => $request->proker_id,
+                'proker_id'          => $request->proker_id,
                 'penanggung_jawab_id' => $proker->anggota_id,
-                'estimasi_mulai' => $request->estimasi_mulai,
-                'estimasi_selesai' => $request->estimasi_selesai,
-                'status' => $request->status,
+                'estimasi_mulai'     => $request->estimasi_mulai,
+                'estimasi_selesai'   => $request->estimasi_selesai,
+                'status'             => $request->status,
             ]);
 
             foreach ($request->kegiatan as $i => $keg) {
                 JadwalProkerDetail::create([
                     'jadwal_proker_id' => $jadwal->id,
-                    'kegiatan' => $keg,
-                    'tanggal_mulai' => $request->tanggal_mulai[$i],
-                    'tanggal_selesai' => $request->tanggal_selesai[$i],
-                    'catatan' => $request->catatan[$i] ?? null,
+                    'kegiatan'         => $keg,
+                    'tanggal_mulai'    => $request->tanggal_mulai[$i],
+                    'tanggal_selesai'  => $request->tanggal_selesai[$i],
+                    'catatan'          => $request->catatan[$i] ?? null,
                 ]);
             }
         });
 
-        return back()->with('success', 'Jadwal proker berhasil dibuat.');
+        return redirect()->route('jadwal-proker.index')
+            ->with('success', 'Jadwal proker berhasil dibuat.');
     }
 
     public function edit($id)
@@ -157,110 +186,109 @@ class JadwalProkerController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'proker_id' => 'required|exists:prokers,id',
-            'estimasi_mulai'   => 'nullable|date',
-            'estimasi_selesai' => 'nullable|date|after_or_equal:estimasi_mulai',
-            'status' => 'required|in:penjadwalan,berjalan,selesai',
+            'proker_id'         => 'required|exists:prokers,id',
+            'estimasi_mulai'    => 'nullable|date',
+            'estimasi_selesai'  => 'nullable|date|after_or_equal:estimasi_mulai',
+            'status'             => 'required|in:penjadwalan,berjalan,selesai',
 
-            'kegiatan' => 'required|array|min:1',
-            'kegiatan.*' => 'required|string|max:255',
+            'kegiatan'           => 'required|array|min:1',
+            'kegiatan.*'         => 'required|string|max:255',
 
-            'tanggal_mulai' => 'required|array|min:1',
-            'tanggal_mulai.*' => 'required|date',
+            'tanggal_mulai'      => 'required|array|min:1',
+            'tanggal_mulai.*'    => 'required|date',
 
-            'tanggal_selesai' => 'required|array|min:1',
-            'tanggal_selesai.*' => 'required|date',
+            'tanggal_selesai'    => 'required|array|min:1',
+            'tanggal_selesai.*'  => 'required|date',
 
-            'catatan' => 'nullable|array',
-            'catatan.*' => 'nullable|string',
+            'catatan'             => 'nullable|array',
+            'catatan.*'           => 'nullable|string',
 
-            // optional: jika form mengirimkan id detail
-            'detail_id' => 'nullable|array',
-            'detail_id.*' => 'nullable|integer|exists:jadwal_proker_details,id',
+            'detail_id'           => 'nullable|array',
+            'detail_id.*'         => 'nullable|integer|exists:jadwal_proker_details,id',
         ]);
 
-        $user = Auth::user();
+        $user          = Auth::user();
         $anggotaStatus = $user->anggota->status->status ?? null;
-        $rantingId = $user->anggota->ranting_id;
+        $rantingId     = $user->anggota->ranting_id;
 
-        $proker = Proker::findOrFail($request->proker_id);
+        $proker     = Proker::findOrFail($request->proker_id);
+        $jadwal     = JadwalProker::findOrFail($id);
 
-        // Validasi akses update
         if ($anggotaStatus !== 'MWC' && $proker->ranting_id != $rantingId) {
-            abort(403, "Anda tidak dapat mengubah jadwal untuk proker milik ranting lain.");
+            abort(403, "Anda tidak dapat mengubah jadwal proker ranting lain.");
         }
 
-        DB::transaction(function () use ($request, $id, $proker) {
-            $jadwal = JadwalProker::findOrFail($id);
+        // ✅ CEK BENTROK TAPI KECUALIKAN DIRI SENDIRI
+        if ($request->estimasi_mulai && $request->estimasi_selesai) {
+            $bentrok = $this->isBentrok(
+                $request->estimasi_mulai,
+                $request->estimasi_selesai,
+                $jadwal->id
+            );
+
+            if ($bentrok) {
+                return back()->withErrors('Tanggal update ini bentrok dengan jadwal proker lain.')
+                    ->withInput();
+            }
+        }
+
+        DB::transaction(function () use ($request, $jadwal, $proker) {
 
             $jadwal->update([
-                'proker_id' => $request->proker_id,
+                'proker_id'          => $request->proker_id,
                 'penanggung_jawab_id' => $proker->anggota_id,
-                'estimasi_mulai' => $request->estimasi_mulai,
-                'estimasi_selesai' => $request->estimasi_selesai,
-                'status' => $request->status,
+                'estimasi_mulai'     => $request->estimasi_mulai,
+                'estimasi_selesai'   => $request->estimasi_selesai,
+                'status'             => $request->status,
             ]);
 
             $inputDetailIds = $request->input('detail_id', null);
 
             if (is_array($inputDetailIds)) {
-                // ALUR 1: update berdasarkan detail_id[]
-                $inputIdsFiltered = array_filter($inputDetailIds, fn($v) => !empty($v));
-                // Hapus detail yang tidak ada dalam input (keep foto di row yang diupdate)
-                $jadwal->details()->whereNotIn('id', $inputIdsFiltered)->delete();
 
-                // iterate over input rows: if id exists -> update; if empty -> create
+                $ids = array_filter($inputDetailIds);
+                $jadwal->details()->whereNotIn('id', $ids)->delete();
+
                 foreach ($request->kegiatan as $i => $keg) {
-                    $detailId = $inputDetailIds[$i] ?? null;
                     $data = [
-                        'kegiatan' => $keg,
-                        'tanggal_mulai' => $request->tanggal_mulai[$i],
+                        'kegiatan'        => $keg,
+                        'tanggal_mulai'   => $request->tanggal_mulai[$i],
                         'tanggal_selesai' => $request->tanggal_selesai[$i],
-                        'catatan' => $request->catatan[$i] ?? null,
+                        'catatan'         => $request->catatan[$i] ?? null,
                     ];
 
-                    if ($detailId) {
-                        // update existing (foto tetap)
-                        $detail = JadwalProkerDetail::find($detailId);
+                    if (!empty($inputDetailIds[$i])) {
+                        $detail = JadwalProkerDetail::find($inputDetailIds[$i]);
                         if ($detail) {
                             $detail->update($data);
-                        } else {
-                            // jika id tidak ditemukan (safety), buat baru
-                            $data['jadwal_proker_id'] = $jadwal->id;
-                            JadwalProkerDetail::create($data);
                         }
                     } else {
-                        // create new
                         $data['jadwal_proker_id'] = $jadwal->id;
                         JadwalProkerDetail::create($data);
                     }
                 }
             } else {
-                // ALUR 2: fallback (form lama tanpa detail_id[])
-                // backup foto lama berdasarkan urutan
-                $oldDetails = $jadwal->details()->get()->values();
-                $oldFotos = $oldDetails->map(fn($d) => $d->foto)->toArray();
 
-                // delete all old details
+                $oldDetails = $jadwal->details()->get();
+                $oldFotos   = $oldDetails->pluck('foto')->toArray();
+
                 $jadwal->details()->delete();
 
-                // recreate, dan restore foto jika ada berdasarkan index
                 foreach ($request->kegiatan as $i => $keg) {
-                    $fotoRestore = $oldFotos[$i] ?? null;
-
                     JadwalProkerDetail::create([
                         'jadwal_proker_id' => $jadwal->id,
-                        'kegiatan' => $keg,
-                        'tanggal_mulai' => $request->tanggal_mulai[$i],
-                        'tanggal_selesai' => $request->tanggal_selesai[$i],
-                        'catatan' => $request->catatan[$i] ?? null,
-                        'foto' => $fotoRestore,
+                        'kegiatan'         => $keg,
+                        'tanggal_mulai'    => $request->tanggal_mulai[$i],
+                        'tanggal_selesai'  => $request->tanggal_selesai[$i],
+                        'catatan'          => $request->catatan[$i] ?? null,
+                        'foto'              => $oldFotos[$i] ?? null,
                     ]);
                 }
             }
         });
 
-        return redirect()->route('jadwal-proker.index')->with('success', 'Jadwal berhasil diperbarui.');
+        return redirect()->route('jadwal-proker.index')
+            ->with('success', 'Jadwal berhasil diperbarui.');
     }
 
     public function destroy($id)

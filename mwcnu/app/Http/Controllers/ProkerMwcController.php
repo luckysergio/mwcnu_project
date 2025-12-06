@@ -36,7 +36,7 @@ class ProkerMwcController extends Controller
                 $s->where('status', 'MWC');
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10); // ✅ Pagination 10 data per halaman
+            ->paginate(10);
 
         return view('pages.prokermwc.index', compact('prokers', 'status', 'rantingId'));
     }
@@ -56,7 +56,6 @@ class ProkerMwcController extends Controller
             'sasarans' => Sasaran::orderBy('nama')->get(),
         ]);
     }
-
 
     public function store(Request $request)
     {
@@ -149,7 +148,6 @@ class ProkerMwcController extends Controller
         ]);
     }
 
-
     public function update(Request $request, $id)
     {
         $anggota = Auth::user()->anggota;
@@ -227,7 +225,6 @@ class ProkerMwcController extends Controller
             abort(403, 'Ini bukan Proker MWC.');
         }
 
-        // Hapus file proposal
         if ($proker->proposal && Storage::disk('public')->exists($proker->proposal)) {
             Storage::disk('public')->delete($proker->proposal);
         }
@@ -301,24 +298,24 @@ class ProkerMwcController extends Controller
     }
 
     public function disabledDates()
-{
-    $dates = JadwalProker::join('prokers', 'jadwal_prokers.proker_id', '=', 'prokers.id')
-        ->where('prokers.status', 'disetujui')
-        ->select('jadwal_prokers.estimasi_mulai', 'jadwal_prokers.estimasi_selesai')
-        ->get();
+    {
+        $dates = JadwalProker::join('prokers', 'jadwal_prokers.proker_id', '=', 'prokers.id')
+            ->where('prokers.status', 'disetujui')
+            ->select('jadwal_prokers.estimasi_mulai', 'jadwal_prokers.estimasi_selesai')
+            ->get();
 
-    $disabled = collect();
+        $disabled = collect();
 
-    foreach ($dates as $item) {
-        $start = Carbon::parse($item->estimasi_mulai);
-        $end   = Carbon::parse($item->estimasi_selesai);
+        foreach ($dates as $item) {
+            $start = Carbon::parse($item->estimasi_mulai);
+            $end   = Carbon::parse($item->estimasi_selesai);
 
-        while ($start <= $end) {
-            $disabled->push($start->format('Y-m-d'));
-            $start->addDay();
+            while ($start <= $end) {
+                $disabled->push($start->format('Y-m-d'));
+                $start->addDay();
+            }
         }
-    }
 
-    return response()->json($disabled->unique()->values());
-}
+        return response()->json($disabled->unique()->values());
+    }
 }

@@ -52,14 +52,11 @@
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
         @forelse ($jadwals as $item)
-
             @php
-                $estimasiMulai   = $item->estimasi_mulai ? \Carbon\Carbon::parse($item->estimasi_mulai) : null;
+                $estimasiMulai = $item->estimasi_mulai ? \Carbon\Carbon::parse($item->estimasi_mulai) : null;
                 $estimasiSelesai = $item->estimasi_selesai ? \Carbon\Carbon::parse($item->estimasi_selesai) : null;
 
-                $durasi = ($estimasiMulai && $estimasiSelesai)
-                    ? $estimasiMulai->diffInDays($estimasiSelesai) + 1
-                    : null;
+                $durasi = $estimasiMulai && $estimasiSelesai ? $estimasiMulai->diffInDays($estimasiSelesai) + 1 : null;
             @endphp
 
             <div
@@ -69,20 +66,19 @@
 
                     {{-- HEADER --}}
                     <div class="flex flex-col items-center text-center space-y-2">
-    <h2 class="text-lg font-bold text-gray-900 leading-snug">
-        {{ $item->proker->judul }}
-    </h2>
+                        <h2 class="text-lg font-bold text-gray-900 leading-snug">
+                            {{ $item->proker->judul }}
+                        </h2>
 
-    <span
-        class="inline-block px-4 py-1 text-xs font-semibold text-white rounded-full
+                        <span
+                            class="inline-block px-4 py-1 text-xs font-semibold text-white rounded-full
         {{ $item->status == 'penjadwalan' ? 'bg-yellow-500' : ($item->status == 'berjalan' ? 'bg-blue-600' : 'bg-green-600') }}">
-        {{ ucfirst($item->status) }}
-    </span>
-</div>
+                            {{ ucfirst($item->status) }}
+                        </span>
+                    </div>
 
                     {{-- PENANGGUNG JAWAB --}}
-                    <p class="text-sm text-gray-600">
-                        Penanggung Jawab:
+                    <p class="text-sm text-gray-600 text-center">
                         <strong class="text-gray-800">
                             {{ $item->penanggungJawab->name ?? '-' }}
                         </strong>
@@ -100,7 +96,7 @@
                             {{ $estimasiSelesai ? $estimasiSelesai->translatedFormat('d M Y') : '-' }}
                         </p>
 
-                        @if($durasi)
+                        @if ($durasi)
                             <p class="text-sm text-gray-800 font-semibold mt-1">
                                 Durasi: {{ $durasi }} hari
                             </p>

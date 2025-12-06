@@ -28,22 +28,18 @@
         </div>
 
         <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 mb-10">
-    <div id="calendar" class="min-h-[600px]"></div>
-</div>
+            <div id="calendar" class="min-h-[600px]"></div>
+        </div>
 
-<div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 mt-10">
-    <h2 class="text-xl font-bold mb-4 text-gray-800 text-center">
-        Grafik Status Program Kerja per Ranting
-    </h2>
-    <div class="w-full" style="min-height: 400px">
-        <canvas id="rantingChart"></canvas>
+        <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 mt-10">
+            <h2 class="text-xl font-bold mb-4 text-gray-800 text-center">
+                Grafik Status Program Kerja per Ranting
+            </h2>
+            <div class="w-full" style="min-height: 400px">
+                <canvas id="rantingChart"></canvas>
+            </div>
+        </div>
     </div>
-</div>
-
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -66,7 +62,7 @@
                 events: @json($events),
                 eventDidMount: function(info) {
                     const status = info.event.extendedProps.status;
-                    let color = '#2563eb'; // default blue
+                    let color = '#2563eb';
 
                     if (status === 'penjadwalan') color = '#2563eb';
                     if (status === 'berjalan') color = '#f59e0b';

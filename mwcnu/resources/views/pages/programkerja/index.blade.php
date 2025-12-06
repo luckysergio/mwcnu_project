@@ -12,7 +12,6 @@
         </a>
     </div>
 
-    {{-- Filter --}}
     <form method="GET" class="flex justify-center mb-8">
         <div class="relative w-full max-w-xs">
             <select name="status" onchange="this.form.submit()"
@@ -28,7 +27,6 @@
         </div>
     </form>
 
-    {{-- Alert --}}
     @if (session('success'))
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.15/dist/sweetalert2.all.min.js"></script>
         <script>
@@ -41,7 +39,6 @@
         </script>
     @endif
 
-    {{-- DATA --}}
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         @forelse ($prokers as $item)
             @php
@@ -71,7 +68,6 @@
                         </strong>
                     </p>
 
-                    {{-- INFO DETAIL --}}
                     <div class="text-sm text-gray-700 space-y-1">
                         <p><strong>Ranting:</strong> {{ $item->ranting->kelurahan ?? '-' }}</p>
                         <p><strong>Bidang:</strong> {{ $item->bidang->nama ?? '-' }}</p>
@@ -110,7 +106,6 @@
                     </div>
                 </div>
 
-                {{-- BUTTON ADMIN/MWC --}}
                 @auth
                     @php
                         $anggota = auth()->user()->anggota;
@@ -141,14 +136,12 @@
         @endforelse
     </div>
 
-    {{-- PAGINATION --}}
     @if ($prokers instanceof \Illuminate\Pagination\LengthAwarePaginator)
         <div class="mt-10">
             {{ $prokers->onEachSide(1)->links('pagination::tailwind') }}
         </div>
     @endif
 
-    {{-- SCRIPT DELETE --}}
     <script>
         function confirmDelete(id, judul) {
             Swal.fire({

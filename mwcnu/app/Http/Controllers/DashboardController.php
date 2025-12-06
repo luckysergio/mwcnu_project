@@ -11,9 +11,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // =================
-        // Ambil semua jadwal proker yang disetujui untuk calendar
-        // =================
         $jadwals = JadwalProker::with('proker.ranting')
             ->whereHas('proker', function ($q) {
                 $q->where('status', 'disetujui');
@@ -22,7 +19,6 @@ class DashboardController extends Controller
             ->whereNotNull('estimasi_selesai')
             ->get();
 
-        // Format events untuk FullCalendar: Judul Proker - Nama Ranting
         $events = $jadwals->map(function ($jadwal) {
             $rantingNama = $jadwal->proker->ranting?->kelurahan ?? 'Ranting tidak diketahui';
             return [
@@ -33,19 +29,14 @@ class DashboardController extends Controller
             ];
         })->values();
 
-        // =================
-        // Rekap proker per ranting
-        // =================
         $rantings = Ranting::all();
 
         $data = $rantings->map(function ($ranting) {
-            // Ambil proker disetujui untuk ranting ini
             $prokers = Proker::where('ranting_id', $ranting->id)
                 ->where('status', 'disetujui')
-                ->with('jadwalProker') // gunakan relasi jadwalProker()
+                ->with('jadwalProker')
                 ->get();
 
-            // Hitung status jadwal
             $penjadwalan = $prokers->filter(fn($p) => $p->jadwalProker?->status === 'penjadwalan')->count();
             $berjalan    = $prokers->filter(fn($p) => $p->jadwalProker?->status === 'berjalan')->count();
             $selesai     = $prokers->filter(fn($p) => $p->jadwalProker?->status === 'selesai')->count();

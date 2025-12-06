@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 
 class ProkerController extends Controller
@@ -150,99 +151,120 @@ class ProkerController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'judul'             => 'required|string|max:100',
-        'proposal'          => 'required|mimes:pdf|max:2048',
-        'keterangan'        => 'nullable|string',
-        'estimasi_mulai'    => 'required|date',
-        'estimasi_selesai'  => 'required|date|after_or_equal:estimasi_mulai'
-    ]);
-
-    if (!Auth::user()->anggota) {
-        return back()->withErrors('Akun ini belum terhubung dengan data anggota.');
-    }
-
-    $anggota = Auth::user()->anggota;
-    $ranting_id = $anggota->ranting_id ?? null;
-
-    // Ambil / buat Bidang
-    if ($request->bidang_id === 'add_new') {
-        $request->validate(['new_bidang' => 'required|string|max:50']);
-        $bidang_id = Bidang::create(['nama' => $request->new_bidang])->id;
-    } else {
-        $request->validate(['bidang_id' => 'required|exists:bidangs,id']);
-        $bidang_id = $request->bidang_id;
-    }
-
-    // Ambil / buat Jenis
-    if ($request->jenis_id === 'add_new') {
-        $request->validate(['new_jenis' => 'required|string|max:50']);
-        $jenis_id = JenisKegiatan::create(['nama' => $request->new_jenis])->id;
-    } else {
-        $request->validate(['jenis_id' => 'required|exists:jenis_kegiatans,id']);
-        $jenis_id = $request->jenis_id;
-    }
-
-    // Ambil / buat Tujuan
-    if ($request->tujuan_id === 'add_new') {
-        $request->validate(['new_tujuan' => 'required|string|max:50']);
-        $tujuan_id = Tujuan::create(['nama' => $request->new_tujuan])->id;
-    } else {
-        $request->validate(['tujuan_id' => 'required|exists:tujuans,id']);
-        $tujuan_id = $request->tujuan_id;
-    }
-
-    // Ambil / buat Sasaran
-    if ($request->sasaran_id === 'add_new') {
-        $request->validate(['new_sasaran' => 'required|string|max:50']);
-        $sasaran_id = Sasaran::create(['nama' => $request->new_sasaran])->id;
-    } else {
-        $request->validate(['sasaran_id' => 'required|exists:sasarans,id']);
-        $sasaran_id = $request->sasaran_id;
-    }
-
-    DB::beginTransaction();
-
-    try {
-        // Upload file proposal
-        $filePath = $request->file('proposal')->store('proposals', 'public');
-
-        // Simpan Proker (SIMPAN KE VARIABEL)
-        $proker = Proker::create([
-            'anggota_id'  => $anggota->id,
-            'ranting_id'  => $ranting_id,
-            'judul'       => $request->judul,
-            'bidang_id'   => $bidang_id,
-            'jenis_id'    => $jenis_id,
-            'tujuan_id'   => $tujuan_id,
-            'sasaran_id'  => $sasaran_id,
-            'proposal'    => $filePath,
-            'keterangan'  => $request->keterangan,
+    {
+        $request->validate([
+            'judul'             => 'required|string|max:100',
+            'proposal'          => 'required|mimes:pdf|max:2048',
+            'keterangan'        => 'nullable|string',
+            'estimasi_mulai'    => 'required|date',
+            'estimasi_selesai'  => 'required|date|after_or_equal:estimasi_mulai'
         ]);
 
-        // Buat Jadwal Proker
-        JadwalProker::create([
-            'proker_id'           => $proker->id,
-            'penanggung_jawab_id' => $anggota->id,
-            'estimasi_mulai'       => $request->estimasi_mulai,
-            'estimasi_selesai'     => $request->estimasi_selesai,
-            'status'               => 'penjadwalan'
-        ]);
+        if (!Auth::user()->anggota) {
+            return back()->withErrors('Akun ini belum terhubung dengan data anggota.');
+        }
 
-        DB::commit();
+        $anggota     = Auth::user()->anggota;
+        $ranting_id  = $anggota->ranting_id ?? null;
 
-        return redirect()->route('proker.index')
-            ->with('success', 'Program kerja berhasil diajukan dan dijadwalkan.');
+        // ============ VALIDASI RANGE TANGGAL (ANTI OVERLAP) ============
+        $exists = JadwalProker::where(function ($query) use ($request) {
+            $query->whereBetween('estimasi_mulai', [$request->estimasi_mulai, $request->estimasi_selesai])
+                ->orWhereBetween('estimasi_selesai', [$request->estimasi_mulai, $request->estimasi_selesai])
+                ->orWhere(function ($q) use ($request) {
+                    $q->where('estimasi_mulai', '<=', $request->estimasi_mulai)
+                        ->where('estimasi_selesai', '>=', $request->estimasi_selesai);
+                });
+        })->exists();
 
-    } catch (\Exception $e) {
-        DB::rollBack();
+        if ($exists) {
+            return back()->withErrors('Tanggal yang dipilih bertabrakan dengan jadwal proker lain.');
+        }
 
-        return back()->withErrors(
-            'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()
-        );
+        // ============ BIDANG ============
+        if ($request->bidang_id === 'add_new') {
+            $request->validate(['new_bidang' => 'required|string|max:50']);
+            $bidang_id = Bidang::create(['nama' => $request->new_bidang])->id;
+        } else {
+            $request->validate(['bidang_id' => 'required|exists:bidangs,id']);
+            $bidang_id = $request->bidang_id;
+        }
+
+        // ============ JENIS ============
+        if ($request->jenis_id === 'add_new') {
+            $request->validate(['new_jenis' => 'required|string|max:50']);
+            $jenis_id = JenisKegiatan::create(['nama' => $request->new_jenis])->id;
+        } else {
+            $request->validate(['jenis_id' => 'required|exists:jenis_kegiatans,id']);
+            $jenis_id = $request->jenis_id;
+        }
+
+        // ============ TUJUAN ============
+        if ($request->tujuan_id === 'add_new') {
+            $request->validate(['new_tujuan' => 'required|string|max:50']);
+            $tujuan_id = Tujuan::create(['nama' => $request->new_tujuan])->id;
+        } else {
+            $request->validate(['tujuan_id' => 'required|exists:tujuans,id']);
+            $tujuan_id = $request->tujuan_id;
+        }
+
+        // ============ SASARAN ============
+        if ($request->sasaran_id === 'add_new') {
+            $request->validate(['new_sasaran' => 'required|string|max:50']);
+            $sasaran_id = Sasaran::create(['nama' => $request->new_sasaran])->id;
+        } else {
+            $request->validate(['sasaran_id' => 'required|exists:sasarans,id']);
+            $sasaran_id = $request->sasaran_id;
+        }
+
+
+        DB::beginTransaction();
+
+        try {
+            // Upload proposal
+            $filePath = $request->file('proposal')->store('proposals', 'public');
+
+            // Simpan Proker
+            $proker = Proker::create([
+                'anggota_id' => $anggota->id,
+                'ranting_id' => $ranting_id,
+                'judul'      => $request->judul,
+                'bidang_id'  => $bidang_id,
+                'jenis_id'   => $jenis_id,
+                'tujuan_id'  => $tujuan_id,
+                'sasaran_id' => $sasaran_id,
+                'proposal'   => $filePath,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            // Simpan Jadwal Proker
+            JadwalProker::create([
+                'proker_id'            => $proker->id,
+                'penanggung_jawab_id'  => $anggota->id,
+                'estimasi_mulai'        => $request->estimasi_mulai,
+                'estimasi_selesai'      => $request->estimasi_selesai,
+                'status'                => 'penjadwalan'
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('proker.index')
+                ->with('success', 'Program kerja berhasil diajukan dan dijadwalkan.');
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            // Hapus file jika gagal
+            if (isset($filePath) && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+
+            return back()->withErrors(
+                'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()
+            );
+        }
     }
-}
 
     public function edit(Proker $proker)
     {

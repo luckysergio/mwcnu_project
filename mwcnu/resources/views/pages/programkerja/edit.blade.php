@@ -6,8 +6,6 @@
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="bg-white p-6 rounded-2xl shadow-md space-y-6">
 
-            ```
-            {{-- Header --}}
             <div class="text-center">
                 <h1 class="text-2xl font-bold text-gray-800">Edit Program Kerja</h1>
                 <p class="text-gray-500 text-sm">Ubah data program kerja yang sudah diajukan</p>
